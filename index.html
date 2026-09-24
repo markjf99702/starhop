@@ -79,6 +79,15 @@ html.red .seg{background:rgba(16,1,1,.85)}
 .layers label{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;font-size:14px;color:var(--ink2);cursor:pointer}
 .layers label:hover{background:var(--panel2)}
 .layers input{accent-color:var(--brass);width:16px;height:16px}
+.layers .lydone{margin-top:4px;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;color:var(--ink);font-weight:700;font-size:13px;height:32px}
+html.pointing,html.pointing body{overflow:hidden}
+.pointing .skybox{position:fixed;inset:0;height:auto;min-height:0;z-index:40;background:#04070F}
+.pointing .ov-tl{top:calc(10px + env(safe-area-inset-top,0px))}
+.pointing .ov-tr{top:calc(10px + env(safe-area-inset-top,0px))}
+.pointing .ov-b{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.pointing #dirSeg{display:none}
+.pthint{position:absolute;left:50%;top:calc(58px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:rgba(9,14,28,.86);border:1px solid var(--line2);border-radius:10px;padding:7px 12px;font-size:13px;color:var(--ink2);text-align:center;max-width:min(320px,86vw);pointer-events:none}
+html.red .pthint{background:rgba(16,1,1,.88)}
 
 /* timeline */
 .tl{padding:10px 16px 12px;border-top:1px solid var(--line);background:var(--panel)}
@@ -235,9 +244,10 @@ html.red .chart canvas{background:#050000}
         <div class="overlay ov-tr"><button class="pill" id="layBtn" type="button" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Show</button></div>
         <div class="layers" id="layers" hidden></div>
         <div class="banner" id="banner" hidden></div>
+        <div class="pthint" id="ptHint" hidden>Hold your phone up to the sky. If the map is off, drag it onto a star you know.</div>
         <div class="overlay ov-b">
           <div class="seg" id="dirSeg" role="group" aria-label="Which way to look"><button type="button" data-d="up" title="The whole sky overhead">Up</button><button type="button" data-d="0">N</button><button type="button" data-d="90">E</button><button type="button" data-d="180">S</button><button type="button" data-d="270">W</button></div>
-          <div class="zoom"><button class="pill" id="zOut" type="button" aria-label="Zoom out">−</button><button class="pill" id="zIn" type="button" aria-label="Zoom in">+</button></div>
+          <div class="zoom"><button class="pill" id="ptBtn" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M12 17.5h.01M4 8 2 6m18 2 2-2"/></svg><span id="ptTxt">Point</span></button><button class="pill" id="zOut" type="button" aria-label="Zoom out">−</button><button class="pill" id="zIn" type="button" aria-label="Zoom in">+</button></div>
         </div>
       </div>
       <div class="tl">
@@ -853,6 +863,7 @@ html.red .chart canvas{background:#050000}
     if (sc.sun.alt > -4) { b.hidden = false; b.innerHTML = '<b>' + (sc.sun.alt > 0 ? 'The Sun is up' : 'Twilight') + '</b>' + (sc.sun.alt > 0 ? 'Drag along the night below to see tonight’s sky.' : 'Only the brightest stars and planets show yet.'); } else b.hidden = true;
     drawTimeline();
   }
+  var EAT_TAP = false; // a tap that closes the layers menu shouldn't also pick a star
   cv.__hits = function () { return HITS; }; // lets automated tests find tappable objects
   var raf = 0; function redraw() { if (!raf) raf = requestAnimationFrame(function () { raf = 0; draw(); }); }
 
@@ -860,8 +871,8 @@ html.red .chart canvas{background:#050000}
     var pts = {}, start = null, moved = false;
     function vcount() { return Object.keys(pts).length; }
     cv.addEventListener('pointerdown', function (e) {
-      cv.setPointerCapture(e.pointerId); pts[e.pointerId] = [e.clientX, e.clientY]; moved = false;
-      start = { v: Object.assign({}, V), pts: JSON.parse(JSON.stringify(pts)) }; cv.classList.add('drag');
+      try { cv.setPointerCapture(e.pointerId); } catch (err) { } pts[e.pointerId] = [e.clientX, e.clientY]; moved = false;
+      start = { v: Object.assign({}, V), pts: JSON.parse(JSON.stringify(pts)), dAz: PT.dAz, dAlt: PT.dAlt }; cv.classList.add('drag');
     });
     cv.addEventListener('pointermove', function (e) {
       if (!pts[e.pointerId]) return;
@@ -872,6 +883,10 @@ html.red .chart canvas{background:#050000}
         if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
         if (!moved) return;
         var P = view(start.v, W, H), degpx = R2D / P.s;
+        if (PT.on) {
+          PT.dAz = start.dAz - dx * degpx / Math.max(0.35, Math.cos(Math.min(start.v.alt, 80) * D2R));
+          PT.dAlt = clamp(start.dAlt + dy * degpx, -30, 30); PT.nudged = true; applyPoint(); return;
+        }
         V.alt = clamp(start.v.alt + dy * degpx, -5, 90);
         V.az = norm360(start.v.az - dx * degpx / Math.max(0.35, Math.cos(Math.min(start.v.alt, 80) * D2R)));
         redraw();
@@ -884,8 +899,10 @@ html.red .chart canvas{background:#050000}
     function end(e) {
       var wasMoved = moved, one = vcount() === 1;
       delete pts[e.pointerId]; cv.classList.remove('drag');
-      if (one && !wasMoved && e.type === 'pointerup') tap(e);
-      start = { v: Object.assign({}, V), pts: JSON.parse(JSON.stringify(pts)) };
+      if (one && !wasMoved && e.type === 'pointerup' && !EAT_TAP) tap(e);
+      EAT_TAP = false;
+      start = { v: Object.assign({}, V), pts: JSON.parse(JSON.stringify(pts)), dAz: PT.dAz, dAlt: PT.dAlt };
+      if (PT.on && wasMoved && PT.nudged) { S.ptOff = [PT.dAz, PT.dAlt]; save(); }
       syncDir();
     }
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
@@ -909,7 +926,7 @@ html.red .chart canvas{background:#050000}
     else { V.az = +d; V.alt = 32; V.fov = wide ? 120 : 100; }
     redraw(); syncDir();
   }
-  document.querySelectorAll('#dirSeg button').forEach(function (b) { b.addEventListener('click', function () { look(b.dataset.d); }); });
+  document.querySelectorAll('#dirSeg button').forEach(function (b) { b.addEventListener('click', function () { stopPoint(); look(b.dataset.d); }); });
   $('zIn').addEventListener('click', function () { V.fov = clamp(V.fov / 1.4, 2, 200); redraw(); syncDir(); });
   $('zOut').addEventListener('click', function () { V.fov = clamp(V.fov * 1.4, 2, 200); redraw(); syncDir(); });
   $('nowBtn').addEventListener('click', function () { T.live = true; T.t = new Date(); var n = nightOf(T.t); if (!sameNight(n, NDATE)) setNight(n, true); else { redraw(); renderTonight(); } });
@@ -920,10 +937,77 @@ html.red .chart canvas{background:#050000}
 
   // layers popover
   var LAY = [['lines', 'Constellation lines'], ['names', 'Names'], ['dso', 'Clusters, nebulae, galaxies'], ['mw', 'Milky Way'], ['grid', 'Altitude grid']];
-  $('layers').innerHTML = LAY.map(function (l) { return '<label><input type="checkbox" id="ly_' + l[0] + '">' + l[1] + '</label>'; }).join('');
+  $('layers').innerHTML = LAY.map(function (l) { return '<label><input type="checkbox" id="ly_' + l[0] + '">' + l[1] + '</label>'; }).join('') + '<button class="lydone" type="button" id="lyDone">Done</button>';
   LAY.forEach(function (l) { var i = $('ly_' + l[0]); i.checked = !!S.layers[l[0]]; i.addEventListener('change', function () { S.layers[l[0]] = i.checked; save(); redraw(); }); });
-  $('layBtn').addEventListener('click', function (e) { e.stopPropagation(); var p = $('layers'); p.hidden = !p.hidden; this.setAttribute('aria-expanded', String(!p.hidden)); });
-  document.addEventListener('click', function (e) { var p = $('layers'); if (!p.hidden && !p.contains(e.target) && e.target !== $('layBtn')) { p.hidden = true; $('layBtn').setAttribute('aria-expanded', 'false'); } });
+  function closeLayers() { var p = $('layers'); if (p.hidden) return; p.hidden = true; $('layBtn').setAttribute('aria-expanded', 'false'); }
+  $('layBtn').addEventListener('click', function () { var p = $('layers'); p.hidden = !p.hidden; this.setAttribute('aria-expanded', String(!p.hidden)); });
+  $('lyDone').addEventListener('click', closeLayers);
+  // pointerdown rather than click: iPhones don't send clicks on the map or plain text up to the document
+  document.addEventListener('pointerdown', function (e) { var p = $('layers'); if (!p.hidden && !p.contains(e.target) && !$('layBtn').contains(e.target)) { closeLayers(); if (e.target === cv) EAT_TAP = true; } }, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeLayers(); stopPoint(); } });
+
+  // ---------- point the phone at the sky ----------
+  // The back of the phone is the direction you look. Compasses are rough (and telescopes are metal),
+  // so a drag while pointing nudges the alignment, and the phone remembers it.
+  var PT = { on: false, v: null, got: false, abs: false, dAz: (S.ptOff || [0, 0])[0], dAlt: (S.ptOff || [0, 0])[1], wl: null, t: 0 };
+  var canPoint = 'DeviceOrientationEvent' in window && window.matchMedia && matchMedia('(pointer: coarse)').matches;
+  $('ptBtn').hidden = !canPoint;
+  function devDir(a, b, g) {
+    a *= D2R; b *= D2R; g *= D2R;
+    var cA = Math.cos(a), sA = Math.sin(a), cB = Math.cos(b), sB = Math.sin(b), cG = Math.cos(g), sG = Math.sin(g);
+    // the device's z axis in east-north-up coordinates (W3C DeviceOrientation, Z-X'-Y'' angles); the back looks along −z
+    return [-(cA * sG + sA * sB * cG), -(sA * sG - cA * sB * cG), -(cB * cG)];
+  }
+  function onOri(e) {
+    if (!PT.on) return;
+    var a = e.alpha, abs = e.type === 'deviceorientationabsolute' || e.absolute === true;
+    if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) { a = 360 - e.webkitCompassHeading; abs = true; }
+    if (a == null || e.beta == null || e.gamma == null) return;
+    if (!abs && PT.abs) return; // once a compass-referenced stream arrives, ignore the relative one
+    if (abs) PT.abs = true;
+    PT.got = true;
+    var d = devDir(a, e.beta, e.gamma);
+    PT.v = PT.v ? unit([PT.v[0] * 0.72 + d[0] * 0.28, PT.v[1] * 0.72 + d[1] * 0.28, PT.v[2] * 0.72 + d[2] * 0.28]) : d;
+    applyPoint();
+  }
+  function applyPoint() {
+    if (!PT.v) return;
+    var az = Math.atan2(PT.v[0], PT.v[1]) * R2D, alt = Math.asin(clamp(PT.v[2], -1, 1)) * R2D;
+    V.az = norm360(az + PT.dAz); V.alt = clamp(alt + PT.dAlt, -40, 90);
+    redraw();
+  }
+  function startPoint() {
+    var D = window.DeviceOrientationEvent;
+    function go() {
+      PT.on = true; PT.got = false; PT.v = null; PT.abs = false; PT.nudged = false;
+      document.documentElement.classList.add('pointing'); $('app').classList.add('pointing');
+      $('ptTxt').textContent = 'Stop'; $('ptBtn').classList.add('on'); $('ptHint').hidden = false;
+      setTimeout(function () { $('ptHint').hidden = true; }, 7000);
+      window.addEventListener('deviceorientationabsolute', onOri, true); window.addEventListener('deviceorientation', onOri, true);
+      V.fov = 70;
+      if (!T.live) { T.live = true; T.t = new Date(); var n = nightOf(T.t); if (!sameNight(n, NDATE)) setNight(n, true); }
+      try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { PT.wl = l; }, function () { }); } catch (err) { }
+      redraw();
+      setTimeout(function () {
+        if (!PT.on || PT.got) { if (PT.on && !PT.abs) toast('This phone isn’t reporting compass direction — drag the map to line it up with the sky'); return; }
+        stopPoint();
+        toast(location.hostname.indexOf('github.io') >= 0 || location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'Your phone isn’t sharing its orientation. Check the browser’s motion settings and try again.' : 'Pointing needs the Starhop website: open markjf99702.github.io/starhop on your phone');
+      }, 3000);
+    }
+    if (D && typeof D.requestPermission === 'function') {
+      D.requestPermission().then(function (st) { if (st === 'granted') go(); else toast('Starhop needs motion and orientation access to follow your phone'); }, function () { toast('Pointing needs the Starhop website: open markjf99702.github.io/starhop on your phone'); });
+    } else go();
+  }
+  function stopPoint() {
+    if (!PT.on) return;
+    PT.on = false;
+    window.removeEventListener('deviceorientationabsolute', onOri, true); window.removeEventListener('deviceorientation', onOri, true);
+    document.documentElement.classList.remove('pointing'); $('app').classList.remove('pointing');
+    $('ptTxt').textContent = 'Point'; $('ptBtn').classList.remove('on'); $('ptHint').hidden = true;
+    if (PT.wl) { try { PT.wl.release(); } catch (err) { } PT.wl = null; }
+    redraw(); syncDir();
+  }
+  $('ptBtn').addEventListener('click', function () { if (PT.on) stopPoint(); else startPoint(); });
 
   // ---------- the timeline ----------
   var tl = $('tlc'), tg = tl.getContext('2d');
@@ -1380,6 +1464,7 @@ html.red .chart canvas{background:#050000}
   function locSheet() {
     openSheet('<div class="hd"><h2>Where you observe<small>Times, twilight and what’s up all depend on it</small></h2><button class="btn sec sm" type="button" data-close>Done</button></div><div class="bd">' +
       '<label class="fld"><span>Search for a town or city</span><input id="lq" placeholder="e.g. Austin, Tucson, Lyon" autocomplete="off" inputmode="search"></label><div class="res" id="lres"></div>' +
+      (navigator.geolocation ? '<div class="btnrow"><button class="btn sec sm" type="button" id="lGeo">Use my location</button></div>' : '') +
       '<div class="card"><h3>Or enter exact coordinates</h3><div class="grid2"><label class="fld"><span>Latitude</span><input id="lLat" inputmode="decimal" placeholder="30.27"></label><label class="fld"><span>Longitude</span><input id="lLon" inputmode="decimal" placeholder="-97.74"></label></div><p style="margin-top:8px;font-size:13px">North and east are positive. Your phone’s map app shows the numbers for a spot you tap.</p><div class="btnrow" style="margin-top:10px"><button class="btn sec sm" type="button" id="lUse">Use these coordinates</button></div></div></div>');
     if (S.loc) { $('lLat').value = S.loc.lat.toFixed(4); $('lLon').value = S.loc.lon.toFixed(4); }
     $('lres').innerHTML = '<p style="padding:10px 12px;margin:0;color:var(--ink2);font-size:13.5px">Loading places…</p>';
@@ -1393,6 +1478,17 @@ html.red .chart canvas{background:#050000}
       $('lres').querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { var c = CITIES.c[+b.dataset.i]; applyLoc({ name: c[0] + (c[1] && c[2] === 'US' ? ', ' + c[1] : c[2] && c[2] !== 'US' ? ', ' + c[2] : ''), lat: c[3], lon: c[4], tz: CITIES.tz[c[6]] }); }); });
     }
     $('lq').addEventListener('input', search);
+    if ($('lGeo')) $('lGeo').addEventListener('click', function () {
+      var b = this; b.disabled = true; b.textContent = 'Finding you…';
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        var la = pos.coords.latitude, lo = pos.coords.longitude, tzid = 'UTC';
+        try { tzid = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (err) { }
+        loadCities().then(function () { return null; }, function () { return null; }).then(function () {
+          var near = null, bd = 1e9; if (CITIES) CITIES.c.forEach(function (c) { var d = Math.hypot(c[3] - la, (c[4] - lo) * Math.cos(la * D2R)); if (d < bd) { bd = d; near = c; } });
+          applyLoc({ name: near && bd < 0.6 ? 'Near ' + near[0] : la.toFixed(2) + '°, ' + lo.toFixed(2) + '°', lat: la, lon: lo, tz: tzid });
+        });
+      }, function () { b.disabled = false; b.textContent = 'Use my location'; toast('Couldn’t get your location here — search for a town instead'); }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 });
+    });
     $('lUse').addEventListener('click', function () {
       var la = parseFloat($('lLat').value), lo = parseFloat($('lLon').value);
       if (!(la >= -90 && la <= 90 && lo >= -180 && lo <= 180)) { toast('Latitude runs −90 to 90, longitude −180 to 180'); return; }

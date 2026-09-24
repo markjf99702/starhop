@@ -2,7 +2,9 @@
 
 What's up tonight from where you are, what's worth pointing a telescope at, and how to find it by hopping from stars you know.
 
-It is one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static (GitHub Pages works), or run `python3 -m http.server` in it and open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block reading the data files that way.
+It runs at **https://markjf99702.github.io/starhop/**.
+
+It is one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static, or run `python3 -m http.server` in it and open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block reading the data files that way. Pointing at the sky and **Use my location** need a secure address: https, or localhost.
 
 ## What it does
 
@@ -19,6 +21,11 @@ It is one HTML page plus a few data files, with no build step and no server code
   - **Your telescope:** magnification and field for each eyepiece, which one to use, and a sketch of the eyepiece view.
   - **Planets:** Jupiter's four moons in their positions for that time, Saturn's rings at their current tilt, and the phases of Venus and Mercury.
 - **Coming up.** Moon phases, meteor shower peaks (with how much the Moon interferes), planet oppositions and elongations, the Moon passing bright planets, and eclipses seen from your location.
+- **Point at the sky** (phones, on the website). Tap **Point** and the map fills the screen and follows where the back of your phone points.
+  - Phone compasses are rough, and a metal telescope nearby makes them worse. If the map doesn't match the sky, drag it onto a star you recognize; the phone remembers the correction.
+  - The screen stays on while you point.
+  - Inside claude.ai the page can't read the phone's sensors, so pointing only works on the website.
+- **Use my location** in the location sheet, also on the website; elsewhere, search for a town or enter coordinates.
 - **Night vision.** Everything turns dim red so your eyes stay dark-adapted at the eyepiece.
 - **Remembered in the browser:** your location, telescope, eyepieces, sky and the objects you mark as seen.
 
