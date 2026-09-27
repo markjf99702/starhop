@@ -143,6 +143,9 @@ html.red .pthint{background:rgba(16,1,1,.88)}
 .ev p{margin:2px 0 0;font-size:13px;color:var(--ink2)}
 .credits{font-size:12px;color:var(--ink3);line-height:1.5;border-top:1px solid var(--line);padding-top:14px}
 .credits a{color:var(--ink2)}
+.jd-foot{margin:0;padding:0 0 env(safe-area-inset-bottom,0px);font-size:13px;line-height:1.5;color:var(--ink3);text-align:center}
+.jd-foot a{color:var(--ink2);text-decoration:none}
+.jd-foot a:hover,.jd-foot a:focus-visible{text-decoration:underline;text-underline-offset:3px}
 
 /* glyphs */
 .g{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
@@ -262,6 +265,11 @@ html.red .chart canvas{background:#050000}
       <section class="sec" id="targetSec"></section>
       <section class="sec" id="eventSec"></section>
       <footer class="credits">Positions of the Sun, Moon and planets are computed in your browser with <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener">Astronomy Engine</a> (MIT). Stars, constellations, the Milky Way and deep-sky objects come from <a href="https://github.com/ofrohn/d3-celestial" target="_blank" rel="noopener">d3-celestial</a> (BSD), built on the Hipparcos catalog and SEDS Messier data; cities from <a href="https://github.com/kevinroberts/city-timezones" target="_blank" rel="noopener">city-timezones</a> (MIT). Difficulty ratings are a guide: steady air, dark adaptation and patience matter as much as aperture.</footer>
+      <footer class="jd-foot">
+        <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+      </footer>
     </aside>
   </div>
 </div>
