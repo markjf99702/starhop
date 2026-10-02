@@ -4,7 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="What’s up tonight from where you are, what’s worth pointing a telescope at, and how to star-hop to it.">
+<meta property="og:title" content="Starhop">
+<meta property="og:description" content="What’s up tonight from where you are, and how to star-hop to it.">
+<meta property="og:image" content="https://junkdrawer.works/starhop/og.png">
+<meta property="og:url" content="https://junkdrawer.works/starhop/">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#070B16">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
 <title>Starhop</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=IM+Fell+English:ital@0;1&display=swap">
 <style>
@@ -275,7 +283,7 @@ html.red .chart canvas{background:#050000}
 </div>
 <div id="sheet" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+<script src="js/astronomy.browser.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1538,5 +1546,6 @@ html.red .chart canvas{background:#050000}
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
 })();
 </script>
+<script>if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () { });</script>
 </body>
 </html>
