@@ -3,9 +3,9 @@
 // back to the system's.
 // Network first, so a new version shows up as soon as you're online.
 
-const CACHE = 'starhop-v1'; // bump the number when the file list changes
+const CACHE = 'starhop-v2'; // bump the number when the file list changes
 const SHELL = [
-  './', 'index.html', 'js/astronomy.browser.min.js',
+  './', 'index.html', 'carry.js', 'js/astronomy.browser.min.js',
   'data/stars.json', 'data/constellations.json', 'data/dso.json', 'data/milkyway.json', 'data/tzcity.json', 'data/cities.json',
   'icon.svg', 'icon-180.png', 'icon-192.png', 'manifest.webmanifest',
 ];

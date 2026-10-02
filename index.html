@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="carry.js"></script>
 <meta name="description" content="What’s up tonight from where you are, what’s worth pointing a telescope at, and how to star-hop to it.">
 <meta property="og:title" content="Starhop">
 <meta property="og:description" content="What’s up tonight from where you are, and how to star-hop to it.">
-<meta property="og:image" content="https://junkdrawer.works/starhop/og.png">
-<meta property="og:url" content="https://junkdrawer.works/starhop/">
+<meta property="og:image" content="https://starhop.junkdrawer.works/og.png">
+<meta property="og:url" content="https://starhop.junkdrawer.works/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#070B16">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1008,11 +1009,11 @@ html.red .chart canvas{background:#050000}
       setTimeout(function () {
         if (!PT.on || PT.got) { if (PT.on && !PT.abs) toast('This phone isn’t reporting compass direction — drag the map to line it up with the sky'); return; }
         stopPoint();
-        toast(location.hostname.indexOf('github.io') >= 0 || location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'Your phone isn’t sharing its orientation. Check the browser’s motion settings and try again.' : 'Pointing needs the Starhop website: open markjf99702.github.io/starhop on your phone');
+        toast(window.isSecureContext ? 'Your phone isn’t sharing its orientation. Check the browser’s motion settings and try again.' : 'Pointing needs the Starhop website: open starhop.junkdrawer.works on your phone');
       }, 3000);
     }
     if (D && typeof D.requestPermission === 'function') {
-      D.requestPermission().then(function (st) { if (st === 'granted') go(); else toast('Starhop needs motion and orientation access to follow your phone'); }, function () { toast('Pointing needs the Starhop website: open markjf99702.github.io/starhop on your phone'); });
+      D.requestPermission().then(function (st) { if (st === 'granted') go(); else toast('Starhop needs motion and orientation access to follow your phone'); }, function () { toast('Pointing needs the Starhop website: open starhop.junkdrawer.works on your phone'); });
     } else go();
   }
   function stopPoint() {
