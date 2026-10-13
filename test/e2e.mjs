@@ -266,6 +266,25 @@ check('a damaged or partial save still opens, keeps what makes sense, and is lef
   } finally { await ctx.close(); }
 });
 
+// Where the lit pixels sit around the middle of the eyepiece view: mean offset in CSS pixels, + is west (right).
+const litSide = page => page.$eval('#eyepiece', c => {
+  const g = c.getContext('2d'), k = c.width / c.getBoundingClientRect().width, R = Math.round(14 * k), d = g.getImageData(c.width / 2 - R, c.height / 2 - R, 2 * R, 2 * R).data;
+  let sx = 0, n = 0;
+  for (let y = 0; y < 2 * R; y++) for (let x = 0; x < 2 * R; x++) { const i = (y * 2 * R + x) * 4; if (d[i] + d[i + 1] + d[i + 2] > 300) { sx += x - R; n++; } }
+  return n ? sx / n / k : 0;
+});
+
+// Oct 1 2026, 7:20 pm: Venus is a 14% crescent in the evening sky, so its lit side faces the Sun in the west.
+check('Venus in the eyepiece is lit on the side facing the Sun', async () => {
+  const scope = { name: '130 mm reflector', ap: 130, fl: 650, eps: [{ f: 25, a: 52 }, { f: 4, a: 52 }], set: true };
+  const { ctx, page } = await open({ save: JSON.stringify({ loc: AUSTIN, scope }), time: '2026-10-01T19:20:00-05:00' });
+  try {
+    await openCard(page, 'Venus');
+    await page.waitForFunction(() => /163×/.test(document.getElementById('epCap').textContent));
+    assert.ok(await litSide(page) > 1, 'the crescent is lit on its west side, toward the Sun');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

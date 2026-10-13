@@ -1445,7 +1445,7 @@ html.red .chart canvas{background:#050000}
         });
         g.textAlign = 'left'; cap += ' · Io, Europa, Ganymede and Callisto';
       }
-      if (o.id === 'Venus' || o.id === 'Mercury') { g.fillStyle = col('#0A0F1C', 1); drawPhase(g, cx0, cy0, dpx / 2, pl.frac, Math.atan2(-(0), -1), col(pl.col, 1), col('#0A0F1C', 1)); }
+      if (o.id === 'Venus' || o.id === 'Mercury') { var sunv = vec(sc.sun.ra, sc.sun.dec); drawPhase(g, cx0, cy0, dpx / 2, pl.frac, Math.atan2(-dot(sunv, nth), -dot(sunv, e)), col(pl.col, 1), col('#0A0F1C', 1)); } // lit toward the Sun, as in the close-up
     } else if (o.k === 'moon') {
       var mr = sc.moon.diam * 60 / 2 * scale, sunv = vec(sc.sun.ra, sc.sun.dec), sp = [-dot(sunv, e), -dot(sunv, nth)];
       drawPhase(g, cx0, cy0, mr, sc.moon.illum, Math.atan2(sp[1], sp[0]), col('#EEE7D2', 1), col('#1B1F2B', 1));
