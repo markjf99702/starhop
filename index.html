@@ -1311,7 +1311,7 @@ html.red .chart canvas{background:#050000}
       rows.forEach(function (r, i) { if (r.ok && r.M <= 250) pick = i; });
       if (pick < 0) pick = rows.length - 1;
       var r = rows[pick], ratio = p.diam * r.M / 1865;
-      if (o.k === 'moon') txt = 'The whole Moon fits in the ' + rows[0].f + ' mm eyepiece (' + rows[0].tf.toFixed(1) + '° field). At ' + Math.round(r.M) + '× with the ' + r.f + ' mm, sweep along the terminator — the line between light and dark — where shadows make craters stand out.';
+      if (o.k === 'moon') txt = (rows[0].tf >= sc.moon.diam ? 'The whole Moon fits in the ' + rows[0].f + ' mm eyepiece (' + field(rows[0].tf) + ' field).' : 'The Moon (' + (sc.moon.diam * 60).toFixed(1) + '′ across) is wider than your lowest-power field (' + field(rows[0].tf) + '), so even the ' + rows[0].f + ' mm shows part of it at a time.') + ' At ' + Math.round(r.M) + '× with the ' + r.f + ' mm, sweep along the terminator — the line between light and dark — where shadows make craters stand out.';
       else txt = 'At ' + Math.round(r.M) + '× (the ' + r.f + ' mm), ' + o.id + ' looks ' + (ratio >= 1.15 ? 'about ' + ratio.toFixed(1) + '× as wide as' : ratio >= 0.85 ? 'about as wide as' : 'about ' + (ratio < 0.25 ? (1 / ratio).toFixed(0) : (1 / ratio).toFixed(1)) + '× smaller than') + ' the full Moon does to your eye.' + (o.id === 'Uranus' || o.id === 'Neptune' ? ' At low power it looks like a star; high power shows a tiny coloured disc.' : '');
       return { txt: txt, pick: pick };
     }

@@ -316,6 +316,20 @@ check('a star card says a star stays a point, not how wide it is', async () => {
   } finally { await ctx.close(); }
 });
 
+check('the Moon card says the whole Moon fits only when it does', async () => {
+  const c11 = { name: 'C11', ap: 280, fl: 2800, eps: [{ f: 25, a: 52 }, { f: 12, a: 52 }], set: true };
+  let { ctx, page } = await open({ save: JSON.stringify({ loc: AUSTIN, scope: c11 }), time: '2026-10-18T20:00:00-05:00' });
+  try {
+    await openCard(page, 'Moon');
+    assert.match(await advice(page), /^The Moon \(30\.0′ across\) is wider than your lowest-power field \(28′\), so even the 25 mm shows part of it at a time\. At 233× with the 12 mm,/);
+  } finally { await ctx.close(); }
+  ({ ctx, page } = await open({ time: '2026-10-18T20:00:00-05:00' }));
+  try {
+    await openCard(page, 'Moon');
+    assert.match(await advice(page), /^The whole Moon fits in the 25 mm eyepiece \(2\.0° field\)\./);
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
