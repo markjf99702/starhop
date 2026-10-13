@@ -52,6 +52,8 @@ async function open({ loc = AUSTIN, save, time, tz, phone = true, sw = false, re
 const ready = page => page.waitForFunction(() => document.querySelector('#keys').children.length > 0 || /couldn|wrong/.test(document.querySelector('#tonightSec').textContent), null, { timeout: 90000 });
 const text = (page, sel) => page.$eval(sel, el => el.innerText.replace(/\s+/g, ' ').trim());
 const sheetOpen = page => page.$eval('#sheet', el => !el.hidden);
+// Waits until an element's text matches, since the map redraws on the next frame.
+const until = (page, sel, re) => page.waitForFunction(([s, src]) => new RegExp(src).test(document.querySelector(s).innerText.replace(/\s+/g, ' ').trim()), [sel, re.source], { timeout: 15000 }).catch(() => {});
 
 const checks = [];
 const check = (name, fn) => checks.push([name, fn]);
@@ -79,6 +81,38 @@ check('opens on tonight, lists targets, opens a card, fits a phone and works off
     assert.match(await text(page, '#keys'), /Sunset/, 'it works offline once it has loaded');
     await ctx.setOffline(false);
     assert.deepEqual(problems, [], 'no errors offline');
+  } finally { await ctx.close(); }
+});
+
+// Austin, Wednesday Oct 14 2026: sunrise is 7:32 am, so the night that is ending runs until 8:22 am.
+check('a morning moves on to the coming night, and stays on it past noon', async () => {
+  let { ctx, page, problems } = await open({ time: '2026-10-14T08:15:00-05:00' });
+  try {
+    assert.equal(await text(page, '#nightTitle'), 'Tonight · Tue, Oct 13', 'the night is still going on at 8:15');
+    assert.equal(await page.$eval('#nowBtn', b => b.classList.contains('on')), true);
+    await page.clock.fastForward('10:00'); // the 30-second clock passes 8:22
+    await until(page, '#when', /pm Wed, Oct 14$/);
+    assert.equal(await text(page, '#nightTitle'), 'Tonight · Wed, Oct 14');
+    assert.match(await text(page, '#when'), /pm Wed, Oct 14$/, 'the map moves to tonight once it is dark');
+  } finally { await ctx.close(); }
+  ({ ctx, page, problems } = await open({ time: '2026-10-14T08:30:00-05:00' }));
+  try {
+    assert.equal(await text(page, '#nightTitle'), 'Tonight · Wed, Oct 14');
+    assert.equal(await page.$eval('#tonightSec h2', h => h.firstChild.textContent.trim()), 'Tonight');
+    assert.match(await text(page, '#when'), /pm Wed, Oct 14$/);
+    await page.click('#nowBtn');
+    await until(page, '#when', /Now/);
+    assert.equal(await text(page, '#nightTitle'), 'Tonight · Wed, Oct 14', 'Now keeps tonight');
+    assert.equal(await text(page, '#when'), '8:30 am Now · Wed, Oct 14');
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+  ({ ctx, page, problems } = await open({ time: '2026-10-14T11:59:00-05:00' }));
+  try {
+    assert.equal(await text(page, '#nightTitle'), 'Tonight · Wed, Oct 14');
+    await page.clock.fastForward('02:30');
+    await page.waitForTimeout(300);
+    assert.equal(await text(page, '#nightTitle'), 'Tonight · Wed, Oct 14', 'still tonight after noon');
+    assert.deepEqual(problems, []);
   } finally { await ctx.close(); }
 });
 

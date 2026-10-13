@@ -411,15 +411,28 @@ html.red .chart canvas{background:#050000}
     }
     return out;
   }
-  function computeNight(n) {
+  // A night runs from 50 minutes before sunset to 50 minutes after sunrise, or fixed hours when the Sun doesn't set
+  // or rise. Kept per place, since the clock asks every 30 seconds which night it is.
+  var BOUNDS = {};
+  function nightBounds(n) {
+    var key = [S.loc.lat, S.loc.lon, tz(), n.y, n.mo, n.d].join();
+    if (BOUNDS[key]) return BOUNDS[key];
     var noon = zoned(n.y, n.mo, n.d, 12, 0, tz()), nn = addDays(n, 1), noon2 = zoned(nn.y, nn.mo, nn.d, 12, 0, tz());
+    function rs(dir) { var r = A.SearchRiseSet(A.Body.Sun, OBS, dir, noon, 1); return r && r.date < noon2 ? r.date : null; }
+    var b = { noon: noon, noon2: noon2, sunset: rs(-1), sunrise: rs(1) };
+    if (b.sunrise && b.sunset && b.sunrise < b.sunset) b.sunrise = null; // the morning before the evening: polar edge cases
+    b.start = new Date((b.sunset ? b.sunset.getTime() : noon.getTime() + 6 * 3600e3) - 50 * 60e3);
+    b.end = new Date((b.sunrise ? b.sunrise.getTime() : noon2.getTime() - 6 * 3600e3) + 50 * 60e3);
+    if (b.end - b.start < 3 * 3600e3) { b.start = new Date(noon.getTime() + 6 * 3600e3); b.end = new Date(noon2.getTime() - 6 * 3600e3); }
+    return (BOUNDS[key] = b);
+  }
+  // The night to show at a given moment: the one still going on, or else the coming one. The date alone turns over
+  // at noon, which opened a morning on the night that had just ended.
+  function currentNight(t) { var n = nightOf(t); return t > nightBounds(n).end ? addDays(n, 1) : n; }
+  function computeNight(n) {
+    var b = nightBounds(n), noon = b.noon, noon2 = b.noon2;
     function sa(dir, alt) { var r = A.SearchAltitude(A.Body.Sun, OBS, dir, noon, 1, alt); return r && r.date < noon2 ? r.date : null; }
-    function rs(b, dir, from) { var r = A.SearchRiseSet(b, OBS, dir, from || noon, 1); return r && r.date < noon2 ? r.date : null; }
-    var N = { n: n, noon: noon, noon2: noon2, sunset: rs(A.Body.Sun, -1), sunrise: rs(A.Body.Sun, 1), civD: sa(-1, -6), nauD: sa(-1, -12), astD: sa(-1, -18), astM: sa(1, -18), nauM: sa(1, -12), civM: sa(1, -6) };
-    if (N.sunrise && N.sunset && N.sunrise < N.sunset) N.sunrise = null; // the morning before the evening: polar edge cases
-    N.start = new Date((N.sunset ? N.sunset.getTime() : noon.getTime() + 6 * 3600e3) - 50 * 60e3);
-    N.end = new Date((N.sunrise ? N.sunrise.getTime() : noon2.getTime() - 6 * 3600e3) + 50 * 60e3);
-    if (N.end - N.start < 3 * 3600e3) { N.start = new Date(noon.getTime() + 6 * 3600e3); N.end = new Date(noon2.getTime() - 6 * 3600e3); }
+    var N = { n: n, noon: noon, noon2: noon2, sunset: b.sunset, sunrise: b.sunrise, start: b.start, end: b.end, civD: sa(-1, -6), nauD: sa(-1, -12), astD: sa(-1, -18), astM: sa(1, -18), nauM: sa(1, -12), civM: sa(1, -6) };
     // five-minute samples for the timeline
     N.samples = [];
     for (var x = N.start.getTime(); x <= N.end.getTime(); x += 5 * 60e3) {
@@ -947,7 +960,7 @@ html.red .chart canvas{background:#050000}
   document.querySelectorAll('#dirSeg button').forEach(function (b) { b.addEventListener('click', function () { stopPoint(); look(b.dataset.d); }); });
   $('zIn').addEventListener('click', function () { V.fov = clamp(V.fov / 1.4, 2, 200); redraw(); syncDir(); });
   $('zOut').addEventListener('click', function () { V.fov = clamp(V.fov * 1.4, 2, 200); redraw(); syncDir(); });
-  $('nowBtn').addEventListener('click', function () { T.live = true; T.t = new Date(); var n = nightOf(T.t); if (!sameNight(n, NDATE)) setNight(n, true); else { redraw(); renderTonight(); } });
+  $('nowBtn').addEventListener('click', function () { T.live = true; T.t = new Date(); var n = currentNight(T.t); if (!sameNight(n, NDATE)) setNight(n, true); else { redraw(); renderTonight(); } });
   function center(o) {
     var sc = scene(T.t), h = objHor(o, sc); if (!h) return;
     var aa = altAz(h); V.az = aa.az; V.alt = clamp(aa.alt, 5, 90); V.fov = o.k === 'planet' || o.k === 'moon' ? 30 : o.k === 'double' ? 25 : 40; redraw(); syncDir();
@@ -1003,7 +1016,7 @@ html.red .chart canvas{background:#050000}
       setTimeout(function () { $('ptHint').hidden = true; }, 7000);
       window.addEventListener('deviceorientationabsolute', onOri, true); window.addEventListener('deviceorientation', onOri, true);
       V.fov = 70;
-      if (!T.live) { T.live = true; T.t = new Date(); var n = nightOf(T.t); if (!sameNight(n, NDATE)) setNight(n, true); }
+      if (!T.live) { T.live = true; T.t = new Date(); var n = currentNight(T.t); if (!sameNight(n, NDATE)) setNight(n, true, true); }
       try { if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (l) { PT.wl = l; }, function () { }); } catch (err) { }
       redraw();
       setTimeout(function () {
@@ -1075,10 +1088,12 @@ html.red .chart canvas{background:#050000}
   })();
 
   // ---------- night navigation ----------
-  function setNight(n, keepLive) {
+  // keepLive: follow the clock if it's inside this night, or else show the night once it's dark. alwaysLive follows
+  // the clock even by day, for pointing the phone at the real sky.
+  function setNight(n, keepLive, alwaysLive) {
     NDATE = n; NIGHT = computeNight(n); SCN = {};
     var now = new Date();
-    if (keepLive && now >= NIGHT.start && now <= NIGHT.end) { T.live = true; T.t = now; }
+    if (keepLive && (alwaysLive || (now >= NIGHT.start && now <= NIGHT.end))) { T.live = true; T.t = now; }
     else if (keepLive && T.live && now < NIGHT.start) {
       // daytime: show tonight once it's properly dark
       T.live = false; T.t = new Date(Math.round(((NIGHT.astD || NIGHT.nauD || NIGHT.civD || NIGHT.start).getTime() + 15 * 60e3) / 300e3) * 300e3);
@@ -1101,7 +1116,7 @@ html.red .chart canvas{background:#050000}
     drawPhase(g, size / 2, size / 2, size / 2 - 1.5, frac, phase < 180 ? 0 : Math.PI, col('#F5EFDC', 1), col('#252A3A', 1));
   }
   function renderTonight() {
-    var N = NIGHT, isTonight = sameNight(N.n, nightOf(new Date()));
+    var N = NIGHT, isTonight = sameNight(N.n, currentNight(new Date()));
     var noonName = tLong(N.noon);
     $('nightTitle').textContent = isTonight ? 'Tonight · ' + tDay(N.noon) : 'Night of ' + tDay(N.noon);
     // keys under the timeline
@@ -1515,7 +1530,7 @@ html.red .chart canvas{background:#050000}
     });
     setTimeout(function () { if (!('ontouchstart' in window)) $('lq').focus(); }, 50);
   }
-  function applyLoc(l) { setLoc(l); $('locName').textContent = l.name; closeSheet(); SCN = {}; ANCHORS = ANCHORS; T.live = true; T.t = new Date(); setNight(nightOf(T.t), true); toast('Showing the sky over ' + l.name); }
+  function applyLoc(l) { setLoc(l); $('locName').textContent = l.name; closeSheet(); SCN = {}; ANCHORS = ANCHORS; T.live = true; T.t = new Date(); setNight(currentNight(T.t), true); toast('Showing the sky over ' + l.name); }
   $('locBtn').addEventListener('click', locSheet);
 
   // ---------- night vision ----------
@@ -1538,12 +1553,12 @@ html.red .chart canvas{background:#050000}
     }
     setLoc(S.loc); $('locName').textContent = S.loc.name; renderScopeChip();
     RED = !!S.red; document.documentElement.classList.toggle('red', RED); $('redBtn').setAttribute('aria-pressed', String(RED));
-    setNight(nightOf(new Date()), true);
+    setNight(currentNight(new Date()), true);
     if (S.loc.guessed) setTimeout(function () { toast('Guessed ' + S.loc.name + ' from your time zone — tap it to change'); }, 900);
     syncDir();
   }).catch(function (e) { $('tonightSec').innerHTML = '<p class="lede">Starhop couldn’t load its star catalog (' + esc(e.message) + '). Reload to try again.</p>'; });
   window.addEventListener('resize', function () { redraw(); });
-  setInterval(function () { if (T.live && NIGHT) { T.t = new Date(); var n = nightOf(T.t); if (!sameNight(n, NDATE)) setNight(n, true); else redraw(); } }, 30000);
+  setInterval(function () { if (T.live && NIGHT) { T.t = new Date(); var n = currentNight(T.t); if (!sameNight(n, NDATE)) setNight(n, true); else redraw(); } }, 30000);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
 })();
 </script>
