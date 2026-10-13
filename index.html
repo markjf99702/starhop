@@ -226,9 +226,10 @@ html.red .chart canvas{background:#050000}
   .skywrap{min-height:0}
   .skybox{flex:1;height:auto}
   .panel{overflow:auto;border-left:1px solid var(--line)}
-  .sheetbg{justify-content:flex-end;align-items:stretch;background:transparent;pointer-events:none}
+  /* a sheet takes the side panel's place, below the header, so the sky's controls and the header stay in reach */
+  .sheetbg{top:55px;justify-content:flex-end;align-items:stretch;background:transparent;pointer-events:none}
   .sheet{pointer-events:auto}
-  .sheet{border-radius:0;border:0;border-left:1px solid var(--line2);max-height:none;height:100%;width:470px}
+  .sheet{border-radius:0;border:0;border-left:1px solid var(--line2);max-height:none;height:100%;width:430px}
 }
 @media (max-width:560px){
   .top{gap:6px;padding:10px 12px}

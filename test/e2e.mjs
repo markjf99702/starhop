@@ -166,6 +166,22 @@ check("Jupiter's moons are drawn where they're seen, allowing for light time", a
   } finally { await ctx.close(); }
 });
 
+check('on a desktop an open card covers only the side panel', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  try {
+    await page.click('#targetSec .row');
+    assert.ok(await sheetOpen(page));
+    const box = await page.evaluate(() => { const s = document.querySelector('.sheet').getBoundingClientRect(), p = document.getElementById('panel').getBoundingClientRect(); return { s: [s.left, s.top, s.width], p: [p.left, p.top, p.width] }; });
+    assert.deepEqual(box.s, box.p, 'the card sits exactly over the panel');
+    for (const id of ['zIn', 'nextN', 'layBtn', 'nowBtn', 'redBtn', 'scopeBtn', 'locBtn']) {
+      const onTop = await page.$eval('#' + id, el => { const b = el.getBoundingClientRect(), hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); return el.contains(hit); });
+      assert.ok(onTop, `#${id} is under the card`);
+    }
+    await page.click('#scopeBtn');
+    assert.match(await text(page, '#sheet .hd h2'), /^Your telescope/, 'the Telescope button still works with a card open');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
