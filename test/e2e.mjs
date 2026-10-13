@@ -374,6 +374,21 @@ check('planet rise and set times match the standard ones', async () => {
   } finally { await ctx.close(); }
 });
 
+check('M40 and M73, which have no size, get no made-up size or cluster sketch', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  try {
+    for (const id of ['M40', 'M73']) {
+      await openCard(page, id);
+      const size = await page.$$eval('#sheet .kv div', ds => ds.find(d => d.querySelector('span').textContent === 'Size').querySelector('b').textContent);
+      assert.equal(size, '—', id + ' size');
+      assert.equal(await advice(page), 'Find it with the 25 mm (2.0° field), then try the 10 mm (65×) for a closer look.', id + ' advice');
+      await page.waitForFunction(() => document.getElementById('epCap').textContent);
+      assert.doesNotMatch(await text(page, '#epCap'), /sketch/, id + ' has no cluster sketch');
+      await page.keyboard.press('Escape');
+    }
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

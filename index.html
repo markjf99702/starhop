@@ -1353,7 +1353,7 @@ html.red .chart canvas{background:#050000}
     rows.forEach(function (r, i) { if (r.tf * 60 >= sz * 1.6 && r.xp >= 0.9) pick = i; });
     if (sz > low.tf * 60) { pick = 0; txt = 'At ' + size + ' across, it’s wider than your lowest-power field (' + field(low.tf) + '). Use the ' + low.f + ' mm and pan across it, or try binoculars.'; }
     else if (pick < 0 && sz * 1.6 > low.tf * 60) { pick = 0; txt = 'At ' + size + ' across, it fills most of your lowest-power field (' + field(low.tf) + '). Use the ' + low.f + ' mm, or try binoculars.'; }
-    else { pick = Math.max(pick, 0); txt = 'It spans ' + size + '. Find it with the ' + low.f + ' mm (' + field(low.tf) + ' field)' + (pick ? ', then try the ' + rows[pick].f + ' mm (' + Math.round(rows[pick].M) + '×) for a closer look.' : '.'); }
+    else { pick = Math.max(pick, 0); txt = (o.dim && o.dim[0] ? 'It spans ' + size + '. ' : '') + 'Find it with the ' + low.f + ' mm (' + field(low.tf) + ' field)' + (pick ? ', then try the ' + rows[pick].f + ' mm (' + Math.round(rows[pick].M) + '×) for a closer look.' : '.'); }
     return { txt: txt, pick: pick };
   }
   function riseSet(o) {
@@ -1401,7 +1401,7 @@ html.red .chart canvas{background:#050000}
       about = 'Stars stay points of light in any telescope — even the closest are far too distant to show a disc.';
     } else {
       sub = o.type + ' in ' + con + (o.cat && o.cat !== o.id ? ' · ' + o.cat : '');
-      facts = [['Brightness', o.mag != null ? 'mag ' + o.mag.toFixed(1) : '—'], ['Size', o.dim[0] >= 60 ? (o.dim[0] / 60).toFixed(1) + '°' : Math.round(o.dim[0]) + '′' + (o.dim[1] && o.dim[1] !== o.dim[0] ? ' × ' + Math.round(o.dim[1]) + '′' : '')]];
+      facts = [['Brightness', o.mag != null ? 'mag ' + o.mag.toFixed(1) : '—'], ['Size', !o.dim[0] ? '—' : o.dim[0] >= 60 ? (o.dim[0] / 60).toFixed(1) + '°' : Math.round(o.dim[0]) + '′' + (o.dim[1] && o.dim[1] !== o.dim[0] ? ' × ' + Math.round(o.dim[1]) + '′' : '')]];
       var rt = rating(o, sc.moon.alt > 0 && sc.moon.illum > 0.3); facts.push(['Difficulty', rt.label]);
       about = NOTES[o.id] || NOTES[o.cat] || TYPE_NOTE[o.type] || '';
       if (NOTES[o.id] && TYPE_NOTE[o.type] && o.kind !== 'cluster') about += ' ' + (o.kind === 'galaxy' ? 'Averted vision — looking slightly to one side of it — brings out more.' : '');
@@ -1485,7 +1485,7 @@ html.red .chart canvas{background:#050000}
       g.fillStyle = col(cols[0], 1); g.beginPath(); g.arc(cx0 - (spl ? drawSep / 2 : 0), cy0, 3.2, 0, 2 * Math.PI); g.fill();
       if (spl) { g.fillStyle = col(cols[1], 1); g.beginPath(); g.arc(cx0 + drawSep / 2, cy0, 2.2, 0, 2 * Math.PI); g.fill(); if (sepPx < 12) cap += ' · the pair is drawn wider apart than it looks'; }
       else cap += ' · not split at this power';
-    } else if (o.k !== 'star') {
+    } else if (o.k !== 'star' && o.type !== 'Double star' && o.type !== 'Asterism') { // M40 and M73 are a few faint stars, not a cluster
       var a = Math.max(3, (o.dim[0] || 4) / 2 * scale), b2 = Math.max(2, (o.dim[1] || o.dim[0] || 4) / 2 * scale);
       var bright = o.mag != null ? clamp((10.5 - o.mag) / 7, 0.18, 0.75) : 0.3;
       if (o.kind === 'cluster') {
@@ -1500,7 +1500,7 @@ html.red .chart canvas{background:#050000}
         g.save(); g.translate(cx0, cy0); g.rotate(-0.4); g.scale(a, b2); g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 1, 0, 2 * Math.PI); g.fill(); g.restore();
       }
       cap += ' · a sketch, not a photo — expect it fainter';
-    }
+    } else if (o.k !== 'star') cap += ' · its faint stars aren’t drawn here';
     g.restore();
     g.strokeStyle = col('#2B3860', 1); g.lineWidth = 2; g.beginPath(); g.arc(cx0, cy0, R, 0, 2 * Math.PI); g.stroke();
     if (o.k === 'planet') closeUp(g, w - 50, f.h - 50, 42, o, sc.planets.filter(function (x) { return x.id === o.id; })[0], e, nth);
