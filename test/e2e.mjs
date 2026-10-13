@@ -285,6 +285,18 @@ check('Venus in the eyepiece is lit on the side facing the Sun', async () => {
   } finally { await ctx.close(); }
 });
 
+const advice = page => page.$$eval('#sheet .card', cs => cs.find(c => c.querySelector('h3').textContent === 'In your telescope').querySelector('p').textContent);
+
+check('a card says an object is wider than the field only when it is', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00' });
+  try {
+    const say = async id => { await openCard(page, id); const a = await advice(page); await page.click('#sheet [data-close]'); return a; };
+    assert.equal(await say('M45'), 'At 1.8° across, it fills most of your lowest-power field (2.0°). Use the 25 mm, or try binoculars.');
+    assert.match(await say('M31'), /^At 3\.2° across, it’s wider than your lowest-power field \(2\.0°\)\./);
+    assert.match(await say('M57'), /^It spans 1′\. Find it with the 25 mm \(2\.0° field\), then try the 10 mm \(65×\) for a closer look\.$/);
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
