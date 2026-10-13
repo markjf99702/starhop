@@ -4,7 +4,7 @@ What's up tonight from where you are, what's worth pointing a telescope at, and 
 
 Use it at [starhop.junkdrawer.works](https://starhop.junkdrawer.works/). It installs as an app (from the browser's menu, or Share → Add to Home Screen on an iPhone) and works offline once it has loaded: `sw.js` keeps the page, the library, the data files and the fonts. `manifest.webmanifest` and the icons (`node tools/make-icons.mjs` redraws the PNGs from `icon.svg`) let it install, and `og.png` is the link preview.
 
-It is one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static, or run `python3 -m http.server` in it and open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block reading the data files that way. Pointing at the sky and **Use my location** need a secure address: https, or localhost.
+It is one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static, or run `python3 -m http.server` in it and open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block reading the data files that way. Pointing at the sky and **Use my location** need a secure address: https, or localhost. `npm test` uses the page in Chromium through Playwright, with the place and date pinned so the sky is the same every run.
 
 ## What it does
 
