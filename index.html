@@ -387,7 +387,8 @@ html.red .chart canvas{background:#050000}
   // How faint a star the eye can see: the sky, twilight and the Moon all brighten the background.
   function limitMag(sc) {
     var s = sc.sun.alt, lim = sky().nelm;
-    if (s > -0.8) lim = -2; else if (s > -6) lim = 1.2 + (-6 - s) * -0.25; else if (s > -12) lim = Math.min(lim, 3.2 + (-6 - s) * 0.12); else if (s > -18) lim = Math.min(lim, 4.2 + (-12 - s) * 0.25);
+    // through civil twilight the limit climbs from -0.5 just after sunset to 3.2 at 6° down, where nautical twilight takes over
+    if (s > -0.8) lim = -2; else if (s > -6) lim = Math.min(lim, -0.5 + (-0.8 - s) / 5.2 * 3.7); else if (s > -12) lim = Math.min(lim, 3.2 + (-6 - s) * 0.12); else if (s > -18) lim = Math.min(lim, 4.2 + (-12 - s) * 0.25);
     if (sc.moon.alt > 0) lim -= 1.1 * sc.moon.illum * Math.min(1, sc.moon.alt / 20 + 0.3);
     return lim;
   }

@@ -132,6 +132,22 @@ check('fully dark and the verdict use the same twilight and moonset times as the
   }
 });
 
+// Austin, Oct 13 2026: the Sun sets at 7:01 pm and is 6° down by 7:28.
+check('stars come out steadily through dusk', async () => {
+  const dusk = Date.parse('2026-10-13T19:00:00-05:00');
+  const { ctx, page } = await open({ time: dusk });
+  try {
+    const counts = [];
+    for (let m = 5; m <= 40; m += 5) {
+      await page.clock.pauseAt(new Date(dusk + m * 60e3));
+      await page.click('#nowBtn');
+      await page.clock.runFor(100); // the map redraws on the next frame
+      counts.push(await page.evaluate(() => document.getElementById('sky').__hits().filter(h => h.obj.k === 'star').length));
+    }
+    for (let i = 1; i < counts.length; i++) assert.ok(counts[i] >= counts[i - 1], 'stars drawn every 5 minutes from 7:05 pm: ' + counts.join(', '));
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
