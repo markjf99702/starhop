@@ -116,6 +116,22 @@ check('a morning moves on to the coming night, and stays on it past noon', async
   } finally { await ctx.close(); }
 });
 
+// The times under the timeline, by name: { Sunset: '7:01 pm', Dark: '8:21 pm', ... }
+const keys = page => page.$$eval('#keys span', s => Object.fromEntries(s.map(x => [x.firstChild.textContent.trim(), x.querySelector('b').textContent])));
+const TROMSO = { name: 'Tromsø, NO', lat: 69.65, lon: 18.96, tz: 'Europe/Oslo' };
+
+check('fully dark and the verdict use the same twilight and moonset times as the keys', async () => {
+  for (const [loc, time] of [[AUSTIN, '2026-10-13T21:00:00-05:00'], [TROMSO, '2026-10-13T21:00:00+02:00'], [TROMSO, '2026-12-15T21:00:00+01:00']]) {
+    const { ctx, page } = await open({ loc, time });
+    try {
+      const k = await keys(page), where = loc.name + ' ' + time;
+      assert.equal(await text(page, '#tonightSec .fact.wide b'), k.Dark + ' – ' + k.Dawn, 'fully dark, ' + where);
+      const lede = await text(page, '#tonightSec .lede');
+      if (k.Moonset && /Moon down/.test(lede)) assert.match(lede, new RegExp('from ' + k.Moonset + ' to ' + k.Dawn), 'moonless hours, ' + where);
+    } finally { await ctx.close(); }
+  }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

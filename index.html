@@ -433,22 +433,45 @@ html.red .chart canvas{background:#050000}
     var b = nightBounds(n), noon = b.noon, noon2 = b.noon2;
     function sa(dir, alt) { var r = A.SearchAltitude(A.Body.Sun, OBS, dir, noon, 1, alt); return r && r.date < noon2 ? r.date : null; }
     var N = { n: n, noon: noon, noon2: noon2, sunset: b.sunset, sunrise: b.sunrise, start: b.start, end: b.end, civD: sa(-1, -6), nauD: sa(-1, -12), astD: sa(-1, -18), astM: sa(1, -18), nauM: sa(1, -12), civM: sa(1, -6) };
-    // five-minute samples for the timeline
+    // five-minute samples for the timeline. The Sun's altitude is its true one, which twilight is measured by (as the
+    // twilight times above are); the Moon's includes refraction, like its rise and set times.
     N.samples = [];
     for (var x = N.start.getTime(); x <= N.end.getTime(); x += 5 * 60e3) {
       var t = new Date(x), s = A.Equator(A.Body.Sun, t, OBS, true, true), m = A.Equator(A.Body.Moon, t, OBS, true, true);
-      N.samples.push({ t: t, sun: A.Horizon(t, OBS, s.ra, s.dec, 'normal').altitude, moon: A.Horizon(t, OBS, m.ra, m.dec, 'normal').altitude });
+      N.samples.push({ t: t, sun: A.Horizon(t, OBS, s.ra, s.dec).altitude, moon: A.Horizon(t, OBS, m.ra, m.dec, 'normal').altitude });
     }
-    var moonObj = { k: 'body', b: A.Body.Moon };
-    N.moonEv = crossings(moonObj, N.start, N.end, 15 * 60e3, -0.3);
-    N.moonUpAtStart = N.samples[0].moon > 0;
+    var moonObj = { k: 'body', b: A.Body.Moon }, MOON_UP = -0.3;
+    N.moonEv = crossings(moonObj, N.start, N.end, 15 * 60e3, MOON_UP);
+    N.moonUpAtStart = N.samples[0].moon > MOON_UP;
     var mid = new Date((N.start.getTime() + N.end.getTime()) / 2);
     var mi = A.Illumination(A.Body.Moon, mid); N.moonIllum = mi.phase_fraction; N.moonPhase = A.MoonPhase(mid);
     // dark (Sun 18° down) and moonless stretches
     function spans(test) { var out = [], cur = null; N.samples.forEach(function (s) { if (test(s)) { if (!cur) cur = { a: s.t, b: s.t }; cur.b = s.t; } else if (cur) { out.push(cur); cur = null; } }); if (cur) out.push(cur); return out; }
+    var moonMatters = N.moonIllum >= 0.08;
     N.dark = spans(function (s) { return s.sun < -18; });
-    N.moonless = spans(function (s) { return s.sun < -18 && (s.moon < 0 || N.moonIllum < 0.08); });
+    N.moonless = spans(function (s) { return s.sun < -18 && (s.moon < MOON_UP || !moonMatters); });
     N.nautical = spans(function (s) { return s.sun < -12; });
+    // The samples are five minutes apart, so move the ends of the dark and moonless stretches to the exact twilight,
+    // moonset and moonrise times, the ones in the keys. A stretch starts at the last event that starts it in the five
+    // minutes before its first sample, and ends at the first event that ends it after its last.
+    var first = N.samples[0].t, last = N.samples[N.samples.length - 1].t, sets = [], rises = [];
+    N.moonEv.forEach(function (e) { (e.up ? rises : sets).push(e.t); });
+    function exact(list, starts, ends, moonToo) {
+      list.forEach(function (sp) {
+        var a = null, b = null;
+        starts.forEach(function (e) { if (e && e - sp.a <= 5e3 && sp.a - e < 305e3 && (!a || e > a)) a = e; });
+        ends.forEach(function (e) { if (e && sp.b - e <= 5e3 && e - sp.b < 305e3 && (!b || e < b)) b = e; });
+        if (a) sp.a = a; if (b) sp.b = b;
+      });
+      // With no sunset or sunrise the window has fixed hours, and the dark can begin before it or last past it.
+      var f = list[0], l = list[list.length - 1];
+      function moonDown(t) { return !moonToo || !moonMatters || altOf(moonObj, t) < MOON_UP; }
+      if (f && +f.a === +first && N.astD && N.astD < first && moonDown(N.astD)) f.a = N.astD;
+      if (l && +l.b === +last && N.astM && N.astM > last && moonDown(N.astM)) l.b = N.astM;
+    }
+    if (!N.dark.length && N.astD && N.astM && N.astD < N.astM) N.dark = [{ a: N.astD, b: N.astM }]; // dark for under five minutes
+    exact(N.dark, [N.astD], [N.astM]);
+    exact(N.moonless, [N.astD].concat(moonMatters ? sets : []), [N.astM].concat(moonMatters ? rises : []), true);
     return N;
   }
   function phaseName(ang) {
