@@ -297,6 +297,25 @@ check('a card says an object is wider than the field only when it is', async () 
   } finally { await ctx.close(); }
 });
 
+// Taps an object on the sky map: a planet by name, or a star by its index in data/stars.json.
+const tapMap = async (page, k, id) => {
+  const hit = await page.evaluate(([k, id]) => document.getElementById('sky').__hits().find(h => h.obj.k === k && (h.obj.id === id || h.obj.i === id)), [k, id]);
+  assert.ok(hit, `${k} ${id} is on the map`);
+  const box = await page.locator('#sky').boundingBox();
+  await page.mouse.click(box.x + hit.x, box.y + hit.y);
+  await page.waitForFunction(() => !document.getElementById('sheet').hidden);
+};
+const starIndex = async name => { const n = JSON.parse(await readFile(join(root, 'data/stars.json'), 'utf8')).n; return +Object.keys(n).find(i => n[i][0] === name); };
+
+check('a star card says a star stays a point, not how wide it is', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00' });
+  try {
+    await tapMap(page, 'star', await starIndex('Vega'));
+    assert.match(await text(page, '#sheet .hd h2'), /^Vega/);
+    assert.equal(await advice(page), 'A star stays a point at any power. The 25 mm (2.0° field) shows it with the stars around it.');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

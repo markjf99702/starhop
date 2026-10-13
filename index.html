@@ -1322,6 +1322,7 @@ html.red .chart canvas{background:#050000}
       if (pick < 0) return { txt: 'Splitting a ' + o.sep + '″ pair takes about ' + Math.round(need) + '×; your highest power is ' + Math.round(rows[rows.length - 1].M) + '×. A shorter eyepiece or a 2× Barlow will do it.', pick: rows.length - 1 };
       return { txt: 'The two stars are ' + o.sep + '″ apart; about ' + Math.round(need) + '× splits them, so start with the ' + rows[pick].f + ' mm (' + Math.round(rows[pick].M) + '×).', pick: pick };
     }
+    if (o.k === 'star') return { txt: 'A star stays a point at any power. The ' + rows[0].f + ' mm (' + field(rows[0].tf) + ' field) shows it with the stars around it.', pick: 0 };
     var sz = (o.dim && o.dim[0]) || 5, size = sz >= 60 ? (sz / 60).toFixed(1) + '°' : Math.round(sz) + '′', low = rows[0];
     rows.forEach(function (r, i) { if (r.tf * 60 >= sz * 1.6 && r.xp >= 0.9) pick = i; });
     if (sz > low.tf * 60) { pick = 0; txt = 'At ' + size + ' across, it’s wider than your lowest-power field (' + field(low.tf) + '). Use the ' + low.f + ' mm and pan across it, or try binoculars.'; }
