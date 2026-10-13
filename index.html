@@ -1422,7 +1422,7 @@ html.red .chart canvas{background:#050000}
       '<div class="btnrow"><button class="btn" type="button" id="ctr">Show in the sky view</button><button class="btn sec" type="button" id="seenB">' + (S.seen[o.id] ? '✓ Seen ' + esc(S.seen[o.id]) : 'Mark as seen') + '</button></div></div>';
     openSheet(h, null, again).querySelector('.bd').scrollTop = keep;
     SHEET_OBJ = o;
-    $('ctr').addEventListener('click', function () { closeSheet(); SEL = o; center(o); markRows(); if (window.innerWidth < 1000) window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    $('ctr').addEventListener('click', function () { closeSheet(); SEL = o; center(o); markRows(); if (window.innerWidth < 1000) window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); });
     $('seenB').addEventListener('click', function () { if (S.seen[o.id]) delete S.seen[o.id]; else S.seen[o.id] = tMD(new Date()); save(); openObject(o); renderTargets(); });
     requestAnimationFrame(function () { drawFinder(o, hop); drawEyepiece(o, rows, adv.pick); if (keep && SHEET_OBJ === o) $('sheet').querySelector('.bd').scrollTop = keep; });
   }

@@ -394,6 +394,18 @@ check('star labels in the data are all real designations', async () => {
   assert.deepEqual(Object.entries(n).filter(([, v]) => v.some(x => /undefined/.test(x))), [], 'labels with "undefined" in them');
 });
 
+check('Show in the sky view jumps straight up when motion is reduced', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', reducedMotion: 'reduce' });
+  try {
+    await page.click('#moreT');
+    await page.locator('#targetSec .row').last().click();
+    assert.ok(await page.evaluate(() => scrollY) > 1000, 'the card was opened from far down the list');
+    await page.click('#ctr');
+    await page.waitForTimeout(60);
+    assert.equal(await page.evaluate(() => scrollY), 0, 'no animated scroll');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
