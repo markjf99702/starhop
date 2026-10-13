@@ -406,6 +406,18 @@ check('Show in the sky view jumps straight up when motion is reduced', async () 
   } finally { await ctx.close(); }
 });
 
+check('without JavaScript it says what it needs, and GitHub Pages serves it as it is', async () => {
+  await readFile(join(root, '.nojekyll')).catch(() => assert.fail('.nojekyll is missing'));
+  const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  try {
+    const page = await ctx.newPage();
+    await page.goto(base);
+    const note = page.locator('noscript p'); // Playwright's text search skips <noscript>, so look at it directly
+    assert.ok(await note.isVisible(), 'the no-JavaScript note shows');
+    assert.equal(await note.textContent(), 'Starhop needs JavaScript to draw the sky.');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
