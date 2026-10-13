@@ -389,6 +389,11 @@ check('M40 and M73, which have no size, get no made-up size or cluster sketch', 
   } finally { await ctx.close(); }
 });
 
+check('star labels in the data are all real designations', async () => {
+  const n = JSON.parse(await readFile(join(root, 'data/stars.json'), 'utf8')).n;
+  assert.deepEqual(Object.entries(n).filter(([, v]) => v.some(x => /undefined/.test(x))), [], 'labels with "undefined" in them');
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

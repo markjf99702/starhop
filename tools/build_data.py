@@ -55,6 +55,8 @@ for i, (mag, hip, ra, dec, bv) in enumerate(rows):
         continue
     proper = n.get('name') or ''
     bayer = n.get('bayer') or ''
+    if bayer.startswith('undefined'):  # d3-celestial lost one Greek letter: HIP 20535 (43 Eri) is upsilon-3 Eridani
+        bayer = 'υ' + bayer[len('undefined'):]
     flam = n.get('flam') or ''
     con = n.get('c') or ''
     if proper or (bayer and mag <= 4.5) or (flam and mag <= 4.0):
