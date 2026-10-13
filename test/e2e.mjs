@@ -211,6 +211,21 @@ check('an open card follows the time shown, and other sheets stay as they are', 
   } finally { await ctx.close(); }
 });
 
+check("typed coordinates take a decimal comma and a real minus sign, and refuse what they can't read", async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00' });
+  try {
+    const use = async (lat, lon) => { if (!await sheetOpen(page)) await page.click('#locBtn'); await page.fill('#lLat', lat); await page.fill('#lLon', lon); await page.click('#lUse'); };
+    const saved = async () => { const l = await page.evaluate(() => JSON.parse(localStorage.getItem('starhop.v1')).loc); return [l.lat, l.lon]; };
+    await use('45,76', '4,84');
+    assert.deepEqual(await saved(), [45.76, 4.84], 'decimal commas');
+    await use('30.27', '−97.74');
+    assert.deepEqual(await saved(), [30.27, -97.74], 'a real minus sign');
+    await use('30.27', '97.74 W');
+    assert.ok(await sheetOpen(page), '"97.74 W" is refused, not read as 97.74° east');
+    assert.deepEqual(await saved(), [30.27, -97.74]);
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

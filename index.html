@@ -1525,6 +1525,9 @@ html.red .chart canvas{background:#050000}
   var CITIES = null;
   function loadCities() { if (CITIES) return Promise.resolve(CITIES); return fetch('data/cities.json').then(function (r) { return r.json(); }).then(function (j) { CITIES = j; return j; }); }
   function fold(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  // A typed coordinate. "−97.74" with a real minus sign and "45,76" with a decimal comma are read as meant; anything
+  // else that isn't a plain number ("97.74 W") is refused rather than half read.
+  function coord(v) { v = String(v).trim().replace(/\u2212/g, '-'); if (/^[-+]?\d*,\d+$/.test(v)) v = v.replace(',', '.'); return v === '' ? NaN : Number(v); }
   function locSheet() {
     openSheet('<div class="hd"><h2>Where you observe<small>Times, twilight and what’s up all depend on it</small></h2><button class="btn sec sm" type="button" data-close>Done</button></div><div class="bd">' +
       '<label class="fld"><span>Search for a town or city</span><input id="lq" placeholder="e.g. Austin, Tucson, Lyon" autocomplete="off" inputmode="search"></label><div class="res" id="lres"></div>' +
@@ -1554,7 +1557,8 @@ html.red .chart canvas{background:#050000}
       }, function () { b.disabled = false; b.textContent = 'Use my location'; toast('Couldn’t get your location here — search for a town instead'); }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 600000 });
     });
     $('lUse').addEventListener('click', function () {
-      var la = parseFloat($('lLat').value), lo = parseFloat($('lLon').value);
+      var la = coord($('lLat').value), lo = coord($('lLon').value);
+      if (isNaN(la) || isNaN(lo)) { toast('Enter plain numbers, like 30.27 and −97.74 (south and west are negative)'); return; }
       if (!(la >= -90 && la <= 90 && lo >= -180 && lo <= 180)) { toast('Latitude runs −90 to 90, longitude −180 to 180'); return; }
       var near = null; if (CITIES) { var bd = 1e9; CITIES.c.forEach(function (c) { var d = Math.hypot(c[3] - la, (c[4] - lo) * Math.cos(la * D2R)); if (d < bd) { bd = d; near = c; } }); }
       applyLoc({ name: near && Math.hypot(near[3] - la, near[4] - lo) < 1 ? 'Near ' + near[0] : la.toFixed(2) + '°, ' + lo.toFixed(2) + '°', lat: la, lon: lo, tz: near ? CITIES.tz[near[6]] : (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') });
