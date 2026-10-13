@@ -226,6 +226,17 @@ check("typed coordinates take a decimal comma and a real minus sign, and refuse 
   } finally { await ctx.close(); }
 });
 
+// Chromium reports some zones by older names (Asia/Calcutta, America/Indianapolis, Europe/Kiev).
+check('a first visit guesses the place from the time zone, older zone names too', async () => {
+  for (const [zone, place] of [['Asia/Kolkata', 'Mumbai, IN'], ['America/Indiana/Indianapolis', 'Indianapolis, IN'], ['Europe/Kyiv', 'Kyiv, UA'], ['America/Phoenix', 'Phoenix, AZ']]) {
+    const { ctx, page, problems } = await open({ loc: null, tz: zone, time: '2026-10-13T12:00:00Z' });
+    try {
+      assert.equal(await text(page, '#locName'), place, zone);
+      assert.deepEqual(problems, []);
+    } finally { await ctx.close(); }
+  }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

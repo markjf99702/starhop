@@ -1573,6 +1573,15 @@ html.red .chart canvas{background:#050000}
   $('redBtn').addEventListener('click', function () { setRed(!S.red); toast(S.red ? 'Night vision on — dim red keeps your eyes dark-adapted' : 'Night vision off'); });
 
   // ---------- start ----------
+  // Browsers report some zones by older names (Asia/Calcutta for Asia/Kolkata, America/Indianapolis for
+  // America/Indiana/Indianapolis). Find the zone in the list the browser counts as the same; the list runs from the
+  // biggest city down, so the first match is the likeliest place.
+  function sameZone(list, z) {
+    function id(k) { try { return new Intl.DateTimeFormat('en-US', { timeZone: k }).resolvedOptions().timeZone; } catch (e) { return null; } }
+    var want = id(z), keys = Object.keys(list);
+    for (var i = 0; want && i < keys.length; i++) if (id(keys[i]) === want) return keys[i];
+    return null;
+  }
   function load(name) { return fetch('data/' + name + '.json').then(function (r) { if (!r.ok) throw new Error(name); return r.json(); }); }
   Promise.all([load('stars'), load('constellations'), load('dso'), load('milkyway'), load('tzcity')]).then(function (res) {
     STARS = res[0].s; NAMES = res[0].n;
@@ -1583,8 +1592,9 @@ html.red .chart canvas{background:#050000}
     var mw = res[3], v = [], l = []; for (var j = 0; j < mw.c.length; j += 3) { v.push(vec(mw.c[j], mw.c[j + 1])); l.push(mw.c[j + 2]); } MW = { step: mw.step, v: v, l: l };
     if (!S.loc) {
       var btz = 'America/Chicago'; try { btz = Intl.DateTimeFormat().resolvedOptions().timeZone || btz; } catch (e) { }
-      var tc = res[4][btz] || res[4]['America/Chicago'];
-      S.loc = { name: tc[0] + (tc[2] === 'US' && tc[1] ? ', ' + tc[1] : tc[2] && tc[2] !== 'US' ? ', ' + tc[2] : ''), lat: tc[3], lon: tc[4], tz: btz in res[4] ? btz : 'America/Chicago', guessed: true };
+      if (!res[4][btz]) btz = sameZone(res[4], btz) || 'America/Chicago'; // the place and its zone go together
+      var tc = res[4][btz];
+      S.loc = { name: tc[0] + (tc[2] === 'US' && tc[1] ? ', ' + tc[1] : tc[2] && tc[2] !== 'US' ? ', ' + tc[2] : ''), lat: tc[3], lon: tc[4], tz: btz, guessed: true };
     }
     setLoc(S.loc); $('locName').textContent = S.loc.name; renderScopeChip();
     RED = !!S.red; document.documentElement.classList.toggle('red', RED); $('redBtn').setAttribute('aria-pressed', String(RED));
