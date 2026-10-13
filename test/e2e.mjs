@@ -237,6 +237,35 @@ check('a first visit guesses the place from the time zone, older zone names too'
   }
 });
 
+check('a damaged or partial save still opens, keeps what makes sense, and is left as it was', async () => {
+  const saves = [
+    '{"loc":{"name":"Home"}}', '{"loc":{"name":"Home","lat":30.27,"lon":-97.74,"tz":"Mars/Olympus"}}',
+    '{"loc":{"name":"Home","lat":"30.27","lon":"-97.74","tz":"America/Chicago"}}',
+    '{"scope":null}', '{"seen":null}', '{"layers":"all"}', '{"sky":"moon"}', '{"ptOff":"x"}', '[1,2]', 'not json',
+  ];
+  for (const save of saves) {
+    const { ctx, page, problems } = await open({ save, time: '2026-10-13T21:00:00-05:00' });
+    try {
+      assert.match(await text(page, '#keys'), /Sunset/, 'opens with ' + save);
+      if (save.includes('"30.27"')) assert.equal(await text(page, '#locName'), 'Home', 'numbers written as text still count');
+      await page.click('#targetSec .row');
+      assert.ok(await sheetOpen(page), 'a card opens with ' + save);
+      await page.click('#sheet [data-close]');
+      await page.click('#scopeBtn');
+      assert.ok(await sheetOpen(page), 'the telescope sheet opens with ' + save);
+      assert.deepEqual(problems, [], save);
+      assert.equal(await page.evaluate(() => localStorage.getItem('starhop.v1')), save, 'the save is left as it was');
+    } finally { await ctx.close(); }
+  }
+  const noEyepieces = JSON.stringify({ loc: AUSTIN, scope: { name: 'Old', ap: 130, fl: 650, set: true } });
+  const { ctx, page, problems } = await open({ save: noEyepieces, time: '2026-10-13T21:00:00-05:00' });
+  try {
+    await page.click('#targetSec .row');
+    assert.match(await text(page, '#sheet'), /Add your eyepieces/, 'a telescope saved without eyepieces asks for them');
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

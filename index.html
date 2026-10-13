@@ -319,8 +319,27 @@ html.red .chart canvas{background:#050000}
     { name: '8″ Schmidt-Cassegrain', ap: 203, fl: 2032 }
   ];
   var S = { loc: null, scope: { name: '130 mm reflector', ap: 130, fl: 650, eps: [{ f: 25, a: 52 }, { f: 10, a: 52 }], set: false }, sky: 'suburb', red: false, layers: { lines: true, names: true, dso: true, mw: true, grid: false }, seen: {} };
-  try { var saved = JSON.parse(localStorage.getItem(LS) || 'null'); if (saved && typeof saved === 'object') { S = Object.assign(S, saved); S.layers = Object.assign({ lines: true, names: true, dso: true, mw: true, grid: false }, saved.layers || {}); } } catch (e) { }
+  try { var saved = JSON.parse(localStorage.getItem(LS) || 'null'); if (plain(saved)) S = checkSave(saved, S); } catch (e) { }
   function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) { } }
+  // A save edited by hand or damaged in storage can have parts missing or the wrong shape. Keep each part that makes
+  // sense and use the default for the rest; the stored copy stays as it is until something is changed.
+  function plain(x) { return !!x && typeof x === 'object' && !Array.isArray(x); }
+  function num(x) { return typeof x === 'number' ? x : typeof x === 'string' && x.trim() ? Number(x) : NaN; }
+  function zoneOk(z) { try { return typeof z === 'string' && !!new Intl.DateTimeFormat('en-US', { timeZone: z }); } catch (e) { return false; } }
+  function checkSave(sv, d) {
+    var out = Object.assign({}, d, sv), l = sv.loc, sc = sv.scope;
+    var la = plain(l) ? num(l.lat) : NaN, lo = plain(l) ? num(l.lon) : NaN;
+    out.loc = la >= -90 && la <= 90 && lo >= -180 && lo <= 180 && zoneOk(l.tz) ? Object.assign({}, l, { lat: la, lon: lo, name: typeof l.name === 'string' && l.name ? l.name : la.toFixed(2) + '°, ' + lo.toFixed(2) + '°' }) : null;
+    var ap = plain(sc) ? num(sc.ap) : NaN, fl = plain(sc) ? num(sc.fl) : NaN;
+    out.scope = ap > 0 && fl > 0 ? Object.assign({}, sc, { name: typeof sc.name === 'string' ? sc.name : '', ap: ap, fl: fl, set: !!sc.set,
+      eps: (Array.isArray(sc.eps) ? sc.eps : []).filter(function (e) { return plain(e) && num(e.f) > 1 && num(e.a) > 10; }).map(function (e) { return { f: num(e.f), a: num(e.a) }; }) }) : d.scope;
+    if (!SKIES.some(function (k) { return k.id === sv.sky; })) out.sky = d.sky;
+    out.red = sv.red === true;
+    out.layers = Object.assign({}, d.layers, plain(sv.layers) ? sv.layers : {});
+    out.seen = plain(sv.seen) ? sv.seen : {};
+    if (!(Array.isArray(sv.ptOff) && sv.ptOff.length === 2 && sv.ptOff.every(function (v) { return typeof v === 'number' && isFinite(v); }))) delete out.ptOff;
+    return out;
+  }
   function sky() { return SKIES.filter(function (s) { return s.id === S.sky; })[0] || SKIES[1]; }
 
   // ---------- time zones: every time is shown in the observer's own zone ----------
@@ -363,7 +382,7 @@ html.red .chart canvas{background:#050000}
 
   // ---------- the observer ----------
   var OBS = null;
-  function setLoc(loc) { S.loc = loc; OBS = new A.Observer(loc.lat, loc.lon, 0); save(); if (V.alt > 85) V.az = loc.lat < 0 ? 0 : 180; }
+  function setLoc(loc) { S.loc = loc; OBS = new A.Observer(loc.lat, loc.lon, 0); if (V.alt > 85) V.az = loc.lat < 0 ? 0 : 180; }
 
   // ---------- a moment in the sky: everything the map and cards need, cached ----------
   var SCN = {};
@@ -1565,7 +1584,7 @@ html.red .chart canvas{background:#050000}
     });
     setTimeout(function () { if (!('ontouchstart' in window)) $('lq').focus(); }, 50);
   }
-  function applyLoc(l) { setLoc(l); $('locName').textContent = l.name; closeSheet(); SCN = {}; ANCHORS = ANCHORS; T.live = true; T.t = new Date(); setNight(currentNight(T.t), true); toast('Showing the sky over ' + l.name); }
+  function applyLoc(l) { setLoc(l); save(); $('locName').textContent = l.name; closeSheet(); SCN = {}; ANCHORS = ANCHORS; T.live = true; T.t = new Date(); setNight(currentNight(T.t), true); toast('Showing the sky over ' + l.name); }
   $('locBtn').addEventListener('click', locSheet);
 
   // ---------- night vision ----------
@@ -1583,7 +1602,9 @@ html.red .chart canvas{background:#050000}
     return null;
   }
   function load(name) { return fetch('data/' + name + '.json').then(function (r) { if (!r.ok) throw new Error(name); return r.json(); }); }
+  var LOADED = false;
   Promise.all([load('stars'), load('constellations'), load('dso'), load('milkyway'), load('tzcity')]).then(function (res) {
+    LOADED = true;
     STARS = res[0].s; NAMES = res[0].n;
     SVEC = []; for (var i = 0; i < STARS.length / 4; i++) SVEC.push(vec(STARS[i * 4], STARS[i * 4 + 1]));
     CONS = res[1].map(function (c) { return { a: c.a, n: c.n, rk: c.rk, lvec: vec(c.l[0], c.l[1]), lv: c.ls.map(function (seg) { return seg.map(function (p) { return vec(p[0], p[1]); }); }) }; });
@@ -1601,7 +1622,7 @@ html.red .chart canvas{background:#050000}
     setNight(currentNight(new Date()), true);
     if (S.loc.guessed) setTimeout(function () { toast('Guessed ' + S.loc.name + ' from your time zone — tap it to change'); }, 900);
     syncDir();
-  }).catch(function (e) { $('tonightSec').innerHTML = '<p class="lede">Starhop couldn’t load its star catalog (' + esc(e.message) + '). Reload to try again.</p>'; });
+  }).catch(function (e) { $('tonightSec').innerHTML = '<p class="lede">' + (LOADED ? 'Something went wrong drawing the sky' : 'Starhop couldn’t load its star catalog') + ' (' + esc(e && e.message || e) + '). Reload to try again.</p>'; });
   window.addEventListener('resize', function () { redraw(); });
   setInterval(function () { if (T.live && NIGHT) { T.t = new Date(); var n = currentNight(T.t); if (!sameNight(n, NDATE)) setNight(n, true); else redraw(); } }, 30000);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
