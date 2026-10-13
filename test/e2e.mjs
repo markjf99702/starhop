@@ -182,6 +182,35 @@ check('on a desktop an open card covers only the side panel', async () => {
   } finally { await ctx.close(); }
 });
 
+check('an open card follows the time shown, and other sheets stay as they are', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  const cardAt = () => page.$eval('#sheet .card h3', h => h.textContent);
+  const riseSet = () => page.$eval('#sheet .card p:not(.big)', p => p.textContent);
+  try {
+    const tl = await page.locator('#tlc').boundingBox(), at = f => page.mouse.click(tl.x + tl.width * f, tl.y + tl.height / 2);
+    await openCard(page, 'M13');
+    await page.click('#locBtn');
+    await page.fill('#lq', 'Tucs');
+    await at(0.3);
+    assert.equal(await page.$eval('#sheet .hd h2', h => h.firstChild.textContent), 'Where you observe', 'a click on the timeline leaves the location sheet open');
+    assert.equal(await page.inputValue('#lq'), 'Tucs');
+    await page.keyboard.press('Escape');
+
+    await openCard(page, 'M13');
+    await at(0.55);
+    assert.notEqual(await cardAt(page), 'At 9:00 pm');
+    await page.click('#nowBtn');
+    assert.equal(await cardAt(page), 'At 9:00 pm', 'the card follows Now');
+    await page.focus('#tlc');
+    for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight');
+    await page.waitForFunction(() => document.querySelector('#sheet .card h3').textContent === 'At 10:00 pm', null, { timeout: 5000 }).catch(() => {});
+    assert.equal(await cardAt(page), 'At 10:00 pm', 'the card follows the timeline keys');
+    const before = await riseSet();
+    await page.click('#prevN');
+    assert.notEqual(await riseSet(), before, 'the card follows the night shown');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
