@@ -172,6 +172,7 @@ html.red .g .ds{background:radial-gradient(circle at 30% 50%,#E24A3C 0 3.5px,tra
 #sheet[hidden]{display:none}
 .sheetbg{position:fixed;inset:0;z-index:50;background:rgba(2,4,10,.62);display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--bg);border:1px solid var(--line2);border-bottom:0;border-radius:18px 18px 0 0;width:min(620px,100%);max-height:92%;display:flex;flex-direction:column;box-shadow:0 -20px 50px -10px #000;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet:focus{outline:none}
 .sheet .hd{display:flex;align-items:center;gap:10px;padding:14px 16px 8px}
 .sheet .hd h2{margin:0;flex:1;font:italic 400 25px/1.1 var(--disp);min-width:0;text-wrap:balance}
 .sheet .hd h2 small{display:block;font:400 13px var(--body);font-style:normal;color:var(--ink2);margin-top:3px}
@@ -245,7 +246,7 @@ html.red .chart canvas{background:#050000}
 <div class="app" id="app">
   <header class="top">
     <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="17" r="1.6" fill="currentColor"/><circle cx="12" cy="9" r="1.2" fill="currentColor"/><circle cx="19.5" cy="5" r="2" fill="currentColor"/><path d="M6.4 15.8 10.9 10M13.3 8.3l4.4-2.4" stroke-dasharray="1.6 2.2"/></svg>Starhop</div>
-    <button class="chip" id="locBtn" type="button" aria-label="Change location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span class="t" id="locName">Location</span></button>
+    <button class="chip" id="locBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><span class="sr">Location: </span><span class="t" id="locName">Location</span></button>
     <span class="grow"></span>
     <button class="ibtn" id="redBtn" type="button" aria-pressed="false" aria-label="Night vision: dim red display" title="Night vision — dim red, keeps your eyes dark-adapted"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8" fill="currentColor"/></svg></button>
     <button class="chip" id="scopeBtn" type="button" aria-label="Your telescope"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m3 12.5 12.5-6 2 4.2-12.5 6z"/><path d="m15.5 6.5 3.4-1.6 2 4.2-3.4 1.6M9 16l-2.5 5M10 15.5l2.5 5.5"/></svg><span class="t" id="scopeName">Telescope</span></button>
@@ -1284,13 +1285,28 @@ html.red .chart canvas{background:#050000}
 
   // ---------- sheets ----------
   var SHEET_OBJ = null; // the object whose card is open, if the sheet is one
-  function openSheet(html, onClose) {
-    var s = $('sheet'); SHEET_OBJ = null; s.innerHTML = '<div class="sheetbg"><div class="sheet" role="dialog" aria-modal="true">' + html + '</div></div>'; s.hidden = false;
+  var SHEET_FROM = null; // what had the focus when the sheet opened, to hand it back
+  // A new sheet takes the focus; `again` redraws the open one (a card after Mark as seen, say) and leaves it be.
+  function openSheet(html, onClose, again) {
+    var s = $('sheet'), ae = document.activeElement, inside = !s.hidden && s.contains(ae), fid = inside ? ae.id : '';
+    if (!again && !inside) SHEET_FROM = ae && ae !== document.body ? { el: ae, id: ae.id, row: ae.classList.contains('row') ? ae.dataset.id : null } : null;
+    SHEET_OBJ = null; s.innerHTML = '<div class="sheetbg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1">' + html + '</div></div>'; s.hidden = false;
+    var sh = s.querySelector('.sheet'), h2 = sh.querySelector('.hd h2'); if (h2) h2.id = 'sheetTitle';
     s.querySelector('.sheetbg').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
     s._onClose = onClose; var f = s.querySelector('[data-close]'); if (f) f.addEventListener('click', closeSheet);
-    return s.querySelector('.sheet');
+    if (!again) sh.focus({ preventScroll: true }); else if (inside) ((fid && $(fid)) || sh).focus({ preventScroll: true });
+    return sh;
   }
-  function closeSheet() { var s = $('sheet'); if (s.hidden) return; s.hidden = true; s.innerHTML = ''; SHEET_OBJ = null; if (s._onClose) s._onClose(); }
+  function closeSheet() {
+    var s = $('sheet'), from = SHEET_FROM; if (s.hidden) return;
+    s.hidden = true; s.innerHTML = ''; SHEET_OBJ = null; SHEET_FROM = null; if (s._onClose) s._onClose();
+    // Hand the focus back once whatever the closing redraws is done; the target list may have new rows by then.
+    if (from) setTimeout(function () {
+      if (document.activeElement && document.activeElement !== document.body) return;
+      var el = document.contains(from.el) ? from.el : from.row ? [].filter.call(document.querySelectorAll('#targetSec .row'), function (r) { return r.dataset.id === from.row; })[0] : from.id && $(from.id);
+      if (el) el.focus({ preventScroll: true });
+    }, 0);
+  }
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
 
   // ---------- object card ----------
@@ -1342,7 +1358,7 @@ html.red .chart canvas{background:#050000}
     return { text: bits.join(' · '), hi: hi };
   }
   function openObject(o) {
-    var bd = !$('sheet').hidden && SHEET_OBJ === o && $('sheet').querySelector('.bd'), keep = bd ? bd.scrollTop : 0; // a refresh keeps its place
+    var again = !$('sheet').hidden && SHEET_OBJ === o, keep = again ? $('sheet').querySelector('.bd').scrollTop : 0; // a redraw keeps its place
     var sc = scene(T.t), hv = objHor(o, sc), aa = hv ? altAz(hv) : null, rs = riseSet(o);
     var name = o.name || o.id, sub = '', facts = [], about = '';
     var con = objCon(o, T.t);
@@ -1393,7 +1409,7 @@ html.red .chart canvas{background:#050000}
       '</tbody></table></div></div>' +
       (about ? '<div class="card"><h3>About it</h3><p>' + esc(about) + '</p></div>' : '') +
       '<div class="btnrow"><button class="btn" type="button" id="ctr">Show in the sky view</button><button class="btn sec" type="button" id="seenB">' + (S.seen[o.id] ? '✓ Seen ' + esc(S.seen[o.id]) : 'Mark as seen') + '</button></div></div>';
-    openSheet(h).querySelector('.bd').scrollTop = keep;
+    openSheet(h, null, again).querySelector('.bd').scrollTop = keep;
     SHEET_OBJ = o;
     $('ctr').addEventListener('click', function () { closeSheet(); SEL = o; center(o); markRows(); if (window.innerWidth < 1000) window.scrollTo({ top: 0, behavior: 'smooth' }); });
     $('seenB').addEventListener('click', function () { if (S.seen[o.id]) delete S.seen[o.id]; else S.seen[o.id] = tMD(new Date()); save(); openObject(o); renderTargets(); });
@@ -1540,7 +1556,7 @@ html.red .chart canvas{background:#050000}
     });
     drawEps(); drawSky(); stats();
   }
-  function renderScopeChip() { $('scopeName').textContent = S.scope.set ? (S.scope.name || S.scope.ap + ' mm') : 'Telescope'; }
+  function renderScopeChip() { var n = S.scope.set ? (S.scope.name || S.scope.ap + ' mm') : 'Telescope'; $('scopeName').textContent = n; $('scopeBtn').setAttribute('aria-label', S.scope.set ? 'Telescope: ' + n : 'Your telescope'); }
   $('scopeBtn').addEventListener('click', scopeSheet);
 
   // ---------- location ----------

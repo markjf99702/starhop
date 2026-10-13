@@ -330,6 +330,26 @@ check('the Moon card says the whole Moon fits only when it does', async () => {
   } finally { await ctx.close(); }
 });
 
+check('a sheet takes the keyboard focus, has a name, and gives the focus back', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  const focusIn = sel => page.evaluate(s => document.querySelector(s).contains(document.activeElement), sel);
+  try {
+    const row = page.locator('#targetSec .row').first(), id = await row.getAttribute('data-id');
+    await row.focus();
+    await page.keyboard.press('Enter');
+    assert.ok(await sheetOpen(page));
+    assert.ok(await focusIn('#sheet'), 'the focus moves into the card');
+    const title = await page.$eval('#sheet .hd h2', h => h.firstChild.textContent);
+    assert.equal(await page.getByRole('dialog', { name: new RegExp('^' + title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }).count(), 1, 'the card is named by its title');
+    await page.keyboard.press('Tab');
+    assert.ok(await focusIn('#sheet'), 'Tab stays in the card');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => document.activeElement !== document.body, null, { timeout: 5000 }).catch(() => {});
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.id), id, 'closing gives the focus back to the row');
+    assert.equal(await page.getByRole('button', { name: 'Location: Austin, TX' }).count(), 1, 'the location button is named with the place it shows');
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
