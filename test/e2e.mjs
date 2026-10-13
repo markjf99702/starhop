@@ -148,6 +148,24 @@ check('stars come out steadily through dusk', async () => {
   } finally { await ctx.close(); }
 });
 
+const DOB8 = { name: '8″ Dobsonian', ap: 203, fl: 1200, eps: [{ f: 25, a: 52 }, { f: 6, a: 52 }], set: true };
+const openCard = async (page, id) => {
+  if (!await page.$(`#targetSec .row[data-id="${id}"]`) && await page.$('#moreT')) await page.click('#moreT');
+  await page.click(`#targetSec .row[data-id="${id}"]`);
+  await page.waitForFunction(() => !document.getElementById('sheet').hidden);
+};
+
+// At 6 am on Oct 14 2026 PyEphem, with its own moon theory, puts Io 0.70′ east of Jupiter and Europa 0.50′.
+check("Jupiter's moons are drawn where they're seen, allowing for light time", async () => {
+  const { ctx, page } = await open({ save: JSON.stringify({ loc: AUSTIN, scope: DOB8 }), time: '2026-10-14T06:00:00-05:00' });
+  try {
+    await openCard(page, 'Jupiter');
+    await page.waitForFunction(() => document.getElementById('eyepiece').__moons, null, { timeout: 10000 });
+    const m = await page.$eval('#eyepiece', c => c.__moons), ref = { io: 0.70, europa: 0.50, ganymede: -2.11, callisto: 0.79 };
+    for (const k in ref) assert.ok(Math.abs(m[k].east - ref[k]) < 0.05, `${k} is drawn ${m[k].east.toFixed(2)}′ east of Jupiter; it's ${ref[k]}′`);
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {

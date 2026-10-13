@@ -1409,10 +1409,13 @@ html.red .chart canvas{background:#050000}
       }
       g.fillStyle = col(pl.col, 1); g.beginPath(); g.arc(cx0, cy0, dpx / 2, 0, 2 * Math.PI); g.fill();
       if (o.id === 'Jupiter') {
-        var jm = A.JupiterMoons(t), gv = A.GeoVector(A.Body.Jupiter, t, true), jd = Math.hypot(gv.x, gv.y, gv.z), jv = [gv.x / jd, gv.y / jd, gv.z / jd], je = unit(cross([0, 0, 1], jv)), jn = cross(jv, je);
+        // Jupiter's light takes 35 to 52 minutes to get here, so the moons are drawn where they were when it left
+        var gv = A.GeoVector(A.Body.Jupiter, t, true), jd = Math.hypot(gv.x, gv.y, gv.z), jm = A.JupiterMoons(new Date(t.getTime() - jd / A.C_AUDAY * 864e5));
+        var jv = [gv.x / jd, gv.y / jd, gv.z / jd], je = unit(cross([0, 0, 1], jv)), jn = cross(jv, je), placed = c.__moons = {}; // tests read where they went
         g.font = '700 10px "Atkinson Hyperlegible", sans-serif'; g.textAlign = 'center';
         [['io', 'I'], ['europa', 'E'], ['ganymede', 'G'], ['callisto', 'C']].forEach(function (mm) {
           var m = jm[mm[0]], mv = [m.x, m.y, m.z], x = -dot(mv, je) / jd * R2D * 60 * scale, y = -dot(mv, jn) / jd * R2D * 60 * scale, depth = dot(mv, jv);
+          placed[mm[0]] = { east: dot(mv, je) / jd * R2D * 60, north: dot(mv, jn) / jd * R2D * 60 }; // arcminutes
           if (Math.hypot(x, y) < dpx / 2 && depth > 0) return; // behind the planet
           g.fillStyle = col('#F4EEDC', 1); g.beginPath(); g.arc(cx0 + x, cy0 + y, 1.6, 0, 2 * Math.PI); g.fill();
           g.fillStyle = col('#A7AFC6', 0.9); g.fillText(mm[1], cx0 + x, cy0 + y - 5);
