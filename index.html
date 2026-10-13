@@ -1358,7 +1358,8 @@ html.red .chart canvas{background:#050000}
   }
   function riseSet(o) {
     var N = NIGHT, obj = o.b ? { k: 'body', b: o.b } : { v: o.v || vec(o.ra, o.dec) };
-    var cr = crossings(obj, N.start, N.end, 12 * 60e3, o.k === 'moon' ? -0.3 : -0.5), a0 = altOf(obj, N.start);
+    // A planet's altitude here includes refraction, so it rises at 0°; a star's doesn't, so -0.5° allows for it.
+    var cr = crossings(obj, N.start, N.end, 12 * 60e3, o.k === 'moon' ? -0.3 : o.k === 'planet' ? 0 : -0.5), a0 = altOf(obj, N.start);
     var hi = null, d0 = (N.civD || N.start).getTime(), d1 = (N.civM || N.end).getTime();
     for (var x = d0; x <= d1; x += 10 * 60e3) { var a = altOf(obj, new Date(x)); if (!hi || a > hi.a) hi = { a: a, t: new Date(x) }; }
     var bits = [];

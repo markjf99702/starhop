@@ -363,6 +363,17 @@ check('a sheet takes the keyboard focus, has a name, and gives the focus back', 
   } finally { await ctx.close(); }
 });
 
+// Austin, Oct 13 2026, by the USNO convention (PyEphem): Saturn rises 6:37 pm and sets 6:48 am, Jupiter rises 2:58 am, Mars 1:58 am.
+check('planet rise and set times match the standard ones', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  try {
+    const times = async id => { await openCard(page, id); const t = await page.$eval('#sheet .card p:not(.big)', p => p.textContent); await page.keyboard.press('Escape'); return t; };
+    assert.match(await times('Saturn'), /Rises 6:37 pm · Sets 6:48 am/);
+    assert.match(await times('Jupiter'), /Rises 2:58 am/);
+    assert.match(await times('Mars'), /Rises 1:58 am/);
+  } finally { await ctx.close(); }
+});
+
 const only = process.argv[2];
 let failed = 0, ran = 0;
 for (const [name, fn] of checks) {
