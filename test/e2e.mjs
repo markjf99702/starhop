@@ -52,6 +52,8 @@ async function open({ loc = AUSTIN, save, time, tz, phone = true, sw = false, re
 const ready = page => page.waitForFunction(() => document.querySelector('#keys').children.length > 0 || /couldn|wrong/.test(document.querySelector('#tonightSec').textContent), null, { timeout: 90000 });
 const text = (page, sel) => page.$eval(sel, el => el.innerText.replace(/\s+/g, ' ').trim());
 const sheetOpen = page => page.$eval('#sheet', el => !el.hidden);
+const fontsLoaded = page => page.evaluate(async () => { await document.fonts.ready; return [...new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/"/g, '')))].sort(); });
+const FONTS = ['Atkinson Hyperlegible', 'DM Mono', 'IM Fell English'];
 // Waits until an element's text matches, since the map redraws on the next frame.
 const until = (page, sel, re) => page.waitForFunction(([s, src]) => new RegExp(src).test(document.querySelector(s).innerText.replace(/\s+/g, ' ').trim()), [sel, re.source], { timeout: 15000 }).catch(() => {});
 
@@ -59,9 +61,10 @@ const checks = [];
 const check = (name, fn) => checks.push([name, fn]);
 
 check('opens on tonight, lists targets, opens a card, fits a phone and works offline', async () => {
-  const { ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', sw: true });
+  const { ctx, page, problems, outside } = await open({ time: '2026-10-13T21:00:00-05:00', sw: true });
   try {
     assert.match(await text(page, '#nightTitle'), /^Tonight · Tue, Oct 13$/);
+    assert.deepEqual(await fontsLoaded(page), FONTS, 'its own fonts load');
     assert.match(await text(page, '#keys'), /Sunset \d+:\d\d pm/);
     assert.equal(await page.$eval('#tonightSec h2', h => h.textContent), 'Tonight Austin, TX');
     assert.ok(await page.$$eval('#targetSec .row', r => r.length) >= 10, 'the target list fills in');
@@ -73,15 +76,25 @@ check('opens on tonight, lists targets, opens a card, fits a phone and works off
     assert.equal(await sheetOpen(page), false, 'Done closes the card');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the page scrolls sideways on a phone');
     assert.deepEqual(problems, [], 'no errors');
+    assert.deepEqual(outside, [], 'nothing loads from another site');
 
     await page.waitForFunction(() => navigator.serviceWorker.controller, null, { timeout: 20000 });
     await ctx.setOffline(true);
     await page.reload();
     await ready(page);
     assert.match(await text(page, '#keys'), /Sunset/, 'it works offline once it has loaded');
+    assert.deepEqual(await fontsLoaded(page), FONTS, 'with its fonts');
     await ctx.setOffline(false);
     assert.deepEqual(problems, [], 'no errors offline');
   } finally { await ctx.close(); }
+});
+
+check('the offline copy lists files that exist, fonts included', async () => {
+  const list = [...(await readFile(join(root, 'sw.js'), 'utf8')).match(/const SHELL = \[([\s\S]*?)\];/)[1].matchAll(/'([^']+)'/g)].map(m => m[1]).filter(f => f !== './');
+  for (const f of list) await readFile(join(root, f)).catch(() => assert.fail(`sw.js keeps ${f}, which doesn't exist`));
+  const fonts = (await readFile(join(root, 'index.html'), 'utf8')).match(/fonts\/[\w-]+\.woff2/g) || [];
+  assert.ok(fonts.length, 'the page uses fonts from fonts/');
+  for (const f of fonts) assert.ok(list.includes(f), `sw.js doesn't keep ${f} for offline use`);
 });
 
 // Austin, Wednesday Oct 14 2026: sunrise is 7:32 am, so the night that is ending runs until 8:22 am.

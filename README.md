@@ -2,7 +2,7 @@
 
 What's up tonight from where you are, what's worth pointing a telescope at, and how to find it by hopping from stars you know.
 
-Use it at [starhop.junkdrawer.works](https://starhop.junkdrawer.works/). It installs as an app (from the browser's menu, or Share → Add to Home Screen on an iPhone) and works offline once it has loaded: `sw.js` keeps the page, the library and the data files. `manifest.webmanifest` and the icons (`node tools/make-icons.mjs` redraws the PNGs from `icon.svg`) let it install, and `og.png` is the link preview.
+Use it at [starhop.junkdrawer.works](https://starhop.junkdrawer.works/). It installs as an app (from the browser's menu, or Share → Add to Home Screen on an iPhone) and works offline once it has loaded: `sw.js` keeps the page, the library, the data files and the fonts. `manifest.webmanifest` and the icons (`node tools/make-icons.mjs` redraws the PNGs from `icon.svg`) let it install, and `og.png` is the link preview.
 
 It is one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static, or run `python3 -m http.server` in it and open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block reading the data files that way. Pointing at the sky and **Use my location** need a secure address: https, or localhost.
 
@@ -33,6 +33,7 @@ It is one HTML page plus a few data files, with no build step and no server code
 
 - **Positions.** The Sun, Moon and planets come from [Astronomy Engine](https://github.com/cosinekitty/astronomy) (MIT), version 2.1.19, kept in `js/` so it works offline. The same library supplies rise and set times, twilight, moon phases, Jupiter's moons, Saturn's ring tilt, elongations, oppositions and eclipses.
   - Stars and deep-sky objects are J2000 catalog positions, turned to altitude and azimuth with its rotation matrices.
+- **Fonts.** Atkinson Hyperlegible, DM Mono and IM Fell English (SIL Open Font License) are in `fonts/`, served from here so nothing loads from elsewhere.
 - **Map projection.** Stereographic, the projection planispheres use. It keeps constellation shapes true, and the horizon is always a circle, which makes the ground easy to draw.
 - **Time zones.** Every time is shown in the observing location's own time zone, whatever the device is set to.
 - **Difficulty ratings are a rule of thumb:**
@@ -54,4 +55,4 @@ The double-star notes and object descriptions were written for Starhop. The step
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The data in `data/` keeps its sources' licenses, listed in [data/SOURCES.md](data/SOURCES.md).
+MIT — see [LICENSE](LICENSE). The data in `data/` keeps its sources' licenses, listed in [data/SOURCES.md](data/SOURCES.md), and the fonts in `fonts/` keep the SIL Open Font License.
