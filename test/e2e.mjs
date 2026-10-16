@@ -197,6 +197,73 @@ check("Jupiter's moons are drawn where they're seen, allowing for light time", a
     await page.waitForFunction(() => document.getElementById('eyepiece').__moons, null, { timeout: 10000 });
     const m = await page.$eval('#eyepiece', c => c.__moons), ref = { io: 0.70, europa: 0.50, ganymede: -2.11, callisto: 0.79 };
     for (const k in ref) assert.ok(Math.abs(m[k].east - ref[k]) < 0.05, `${k} is drawn ${m[k].east.toFixed(2)}′ east of Jupiter; it's ${ref[k]}′`);
+    // Io, Europa and Callisto are within 0.3′ of each other, so their letters have to make room.
+    const tags = Object.keys(ref).map(k => [k, m[k].tag]);
+    for (const [k, t] of tags) assert.ok(t, `${k} has its letter`);
+    tags.forEach(([a, ta], i) => tags.slice(i + 1).forEach(([b, tb]) => assert.ok(!overlaps(ta, tb), `the letters of ${a} and ${b} overlap`)));
+  } finally { await ctx.close(); }
+});
+
+// Every label on a chart is inside it, apart from the others, and off the boxes kept clear.
+const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+const checkLabels = (labels, w, h, keep, where) => {
+  assert.ok(labels.length > 3, where + ': labels are drawn');
+  for (const l of labels) assert.ok(l.x >= 0 && l.y >= 0 && l.x + l.w <= w && l.y + l.h <= h, `${where}: "${l.t}" runs off the edge`);
+  labels.forEach((a, i) => labels.slice(i + 1).forEach(b => assert.ok(!overlaps(a, b), `${where}: "${a.t}" and "${b.t}" overlap`)));
+  for (const l of labels) for (const k of keep) assert.ok(!overlaps(l, k), `${where}: "${l.t}" is under ${k.what}`);
+};
+const mapLabels = page => page.evaluate(() => {
+  const c = document.getElementById('sky'), r = c.getBoundingClientRect();
+  const keep = ['when', 'nowBtn', 'banner', 'layBtn', 'dirSeg', 'ptBtn', 'zOut', 'zIn'].map(id => [id, document.getElementById(id).getBoundingClientRect()]).filter(([, b]) => b.width).map(([id, b]) => ({ what: '#' + id, x: b.left - r.left, y: b.top - r.top, w: b.width, h: b.height }));
+  return { labels: c.__labels(), w: r.width, h: r.height, keep };
+});
+const finderLabels = page => page.$eval('#finder', c => { const r = c.getBoundingClientRect(); return { labels: c.__labels, w: r.width, h: r.height, keep: [Object.assign({ what: 'the stamp' }, c.__stamp)] }; });
+
+check('chart labels stay inside, keep apart, keep off the map’s buttons and the finder’s stamp, and go over the ground', async () => {
+  // On a phone at 7:10 pm on Oct 13, facing west puts M11 under the time, M17 under Now and the Cat's Eye under Show,
+  // and facing north puts M13 under the time. At 8:50 Capella sits under the time in the whole-sky view.
+  let { ctx, page, problems } = await open({ time: '2026-10-13T19:10:00-05:00' });
+  try {
+    for (const [d, at] of [['270', '7:10'], ['0', '7:10'], ['up', '8:50']]) {
+      if (at === '8:50') { await page.clock.pauseAt(new Date('2026-10-13T20:50:00-05:00')); await page.click('#nowBtn'); await page.clock.runFor(100); }
+      await page.click(`#dirSeg button[data-d="${d}"]`);
+      await page.waitForTimeout(150);
+      const { labels, w, h, keep } = await mapLabels(page);
+      checkLabels(labels, w, h, keep, `phone map at ${at} facing ${d}`);
+    }
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+  ({ ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false }));
+  try {
+    const { labels, w, h, keep } = await mapLabels(page);
+    checkLabels(labels, w, h, keep, 'desktop map');
+    // Arcturus is just above the western horizon, and its label used to vanish under the ground
+    const lit = await page.evaluate(() => {
+      const c = document.getElementById('sky'), l = c.__labels().find(x => x.t === 'Arcturus'), k = c.width / c.getBoundingClientRect().width;
+      if (!l) return -1;
+      const d = c.getContext('2d').getImageData(Math.round(l.x * k), Math.round(l.y * k), Math.round(l.w * k), Math.round(l.h * k)).data;
+      let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 420) n++;
+      return n;
+    });
+    assert.ok(lit > 10, 'Arcturus’s label shows over the ground (' + lit + ' bright pixels)');
+    await openCard(page, 'M13');
+    await page.waitForFunction(() => document.getElementById('finder').__labels);
+    const f = await finderLabels(page);
+    checkLabels(f.labels, f.w, f.h, f.keep, 'M13’s finder chart');
+    const rut = f.labels.find(l => l.t === 'Rutilicus');
+    assert.ok(rut, 'Rutilicus, where the star-hop starts, keeps its label beside the target’s ring');
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+  // From Sydney, Omega Centauri's chart has Rigil Kentaurus near its right edge and two stars by the stamp.
+  ({ ctx, page, problems } = await open({ loc: { name: 'Sydney, AU', lat: -33.87, lon: 151.21, tz: 'Australia/Sydney' }, time: '2026-04-15T22:00:00+10:00' }));
+  try {
+    await openCard(page, 'NGC 5139');
+    await page.waitForFunction(() => document.getElementById('finder').__labels);
+    const f = await finderLabels(page);
+    checkLabels(f.labels, f.w, f.h, f.keep, 'Omega Centauri’s finder chart');
+    const rk = f.labels.find(l => l.t === 'Rigil Kentaurus');
+    assert.ok(rk && rk.x + rk.w <= rk.ax, 'Rigil Kentaurus is labelled on the left of its star, near the right edge');
+    assert.deepEqual(problems, []);
   } finally { await ctx.close(); }
 });
 
