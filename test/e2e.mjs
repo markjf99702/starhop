@@ -195,6 +195,51 @@ check('on a desktop an open card covers only the side panel', async () => {
   } finally { await ctx.close(); }
 });
 
+// On Android the installed app has only Back to close a card, and Back used to leave Starhop instead.
+check('Back closes an open card or sheet, and closing one another way leaves no extra step behind', async () => {
+  let { ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00' });
+  const back = async () => { await page.evaluate(() => history.back()); await page.waitForFunction(() => document.getElementById('sheet').hidden, null, { timeout: 5000 }).catch(() => {}); };
+  const settled = () => page.waitForFunction(() => !history.state, null, { timeout: 5000 }).catch(() => {});
+  try {
+    const start = page.url(), steps = await page.evaluate(() => history.length);
+    await page.click('#targetSec .row');
+    await back();
+    assert.equal(await sheetOpen(page), false, 'Back closes the card');
+    assert.equal(page.url(), start, 'and stays in Starhop');
+    assert.match(await text(page, '#keys'), /Sunset/);
+    for (const how of ['Done', 'the backdrop', 'Escape', 'Back']) {
+      await page.click('#targetSec .row');
+      if (how === 'Done') await page.click('#sheet [data-close]');
+      else if (how === 'the backdrop') await page.mouse.click(195, 20); // above the card
+      else if (how === 'Escape') await page.keyboard.press('Escape');
+      else await back();
+      await settled();
+      assert.equal(await sheetOpen(page), false, how + ' closes the card');
+      assert.equal(await page.evaluate(() => history.length), steps + 1, 'closing with ' + how + ' takes the card’s step off again');
+    }
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+  ({ ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false }));
+  try {
+    const steps = await page.evaluate(() => history.length);
+    await openCard(page, 'M13');
+    await page.click('#scopeBtn');
+    await page.click('#sheet .hd [data-close]'); // the telescope sheet took the card's place, on the same step
+    await settled();
+    assert.equal(await sheetOpen(page), false);
+    assert.equal(await page.evaluate(() => history.length), steps + 1, 'one step for the card and the sheet that replaced it');
+    await openCard(page, 'M13');
+    await page.click('#locBtn');
+    await back();
+    assert.equal(await sheetOpen(page), false, 'Back closes the sheet that replaced a card');
+    await page.click('#scopeBtn');
+    await page.click('#scSave');
+    await settled();
+    assert.equal(await page.evaluate(() => history.length), steps + 1, 'Save takes the step off too');
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 // On a desktop a click beside the sheet doesn't close it, so it needs a way out that doesn't save.
 check('the telescope sheet closes with Cancel, which drops the changes', async () => {
   const { ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });

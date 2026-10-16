@@ -1298,9 +1298,23 @@ html.red .chart canvas{background:#050000}
   // ---------- sheets ----------
   var SHEET_OBJ = null; // the object whose card is open, if the sheet is one
   var SHEET_FROM = null; // what had the focus when the sheet opened, to hand it back
+  // Back closes an open sheet rather than leaving Starhop; on Android the installed app has nothing else. A sheet that
+  // opens adds one history entry and Back takes it off again. Done, the backdrop and Escape go back over the entry
+  // themselves while it is still the current one. Swapping one sheet for another, or redrawing it, adds nothing.
+  var HIST = { id: Date.now().toString(36), n: 0, cur: '', back: false, later: false };
+  try { history.scrollRestoration = 'manual'; } catch (e) { } // going back over the entry mustn't scroll the page
+  function pushSheet() {
+    if (HIST.back) { HIST.later = true; return; } // still going back over the last one
+    try { HIST.cur = HIST.id + ':' + (++HIST.n); history.pushState({ starhopSheet: HIST.cur }, ''); } catch (e) { HIST.cur = ''; }
+  }
+  window.addEventListener('popstate', function () {
+    if (HIST.back) { HIST.back = false; if (HIST.later) { HIST.later = false; if (!$('sheet').hidden) pushSheet(); } return; }
+    if (!$('sheet').hidden) closeSheet(true);
+  });
   // A new sheet takes the focus; `again` redraws the open one (a card after Mark as seen, say) and leaves it be.
   function openSheet(html, onClose, again) {
     var s = $('sheet'), ae = document.activeElement, inside = !s.hidden && s.contains(ae), fid = inside ? ae.id : '';
+    if (s.hidden) pushSheet();
     if (!again && !inside) SHEET_FROM = ae && ae !== document.body ? { el: ae, id: ae.id, row: ae.classList.contains('row') ? ae.dataset.id : null } : null;
     SHEET_OBJ = null; s.innerHTML = '<div class="sheetbg"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" tabindex="-1">' + html + '</div></div>'; s.hidden = false;
     var sh = s.querySelector('.sheet'), h2 = sh.querySelector('.hd h2'); if (h2) h2.id = 'sheetTitle';
@@ -1309,9 +1323,12 @@ html.red .chart canvas{background:#050000}
     if (!again) sh.focus({ preventScroll: true }); else if (inside) ((fid && $(fid)) || sh).focus({ preventScroll: true });
     return sh;
   }
-  function closeSheet() {
+  function closeSheet(byBack) { // byBack is true when Back closed it and the entry is already gone (a click passes an event)
     var s = $('sheet'), from = SHEET_FROM; if (s.hidden) return;
     s.hidden = true; s.innerHTML = ''; SHEET_OBJ = null; SHEET_FROM = null; if (s._onClose) s._onClose();
+    HIST.later = false;
+    if (byBack !== true && HIST.cur && history.state && history.state.starhopSheet === HIST.cur) { HIST.back = true; history.back(); }
+    HIST.cur = '';
     // Hand the focus back once whatever the closing redraws is done; the target list may have new rows by then.
     if (from) setTimeout(function () {
       if (document.activeElement && document.activeElement !== document.body) return;
