@@ -1,10 +1,16 @@
 # Starhop
 
-What's up tonight from where you are, what's worth pointing a telescope at, and how to find it by hopping from stars you know.
+**Use it: [starhop.junkdrawer.works](https://starhop.junkdrawer.works/)**
 
-Use it at [starhop.junkdrawer.works](https://starhop.junkdrawer.works/). It installs as an app (from the browser's menu, or Share → Add to Home Screen on an iPhone) and works offline once it has loaded: `sw.js` keeps the page, the library, the data files and the fonts. `manifest.webmanifest` and the icons (`node tools/make-icons.mjs` redraws the PNGs from `icon.svg`) let it install, and `og.png` is the link preview.
+**What's up tonight from where you are, what's worth pointing a telescope at, and how to find it by hopping from stars you know.** Set where you observe and the telescope you have, and Starhop draws tonight's sky as it looks from there, says when it's properly dark and lists what's worth a look. Tap anything for where to find it: a finder chart with a star-hop from bright stars, and how it will look in your eyepieces. It installs as an app (from the browser's menu, or Share → Add to Home Screen on an iPhone) and works offline once it has loaded.
 
-It is one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static, or run `python3 -m http.server` in it and open http://localhost:8000. Opening `index.html` straight from disk won't work, because browsers block reading the data files that way. Pointing at the sky and **Use my location** need a secure address: https, or localhost. `npm test` uses the page in Chromium through Playwright, with the place and date pinned so the sky is the same every run.
+<p align="center">
+  <img src="docs/phone-sky.png" alt="Starhop on a phone at 9:15 pm in Chicago: the whole sky as a round map with constellation lines and names, Saturn, Uranus and a crescent Moon setting in the southwest, the night's timeline from sunset to sunrise below it, and the start of tonight's summary" width="250">
+  &nbsp;
+  <img src="docs/phone-tonight.png" alt="Tonight in Chicago: darkest with the Moon down from 9:49 pm to 5:32 am, the sunset, sunrise and fully dark times, a 37% lit Moon, and the start of the list of what to look at, with the Moon, Jupiter, Saturn, Mars and Uranus" width="250">
+  &nbsp;
+  <img src="docs/phone-card.png" alt="The card for M13, the Great Hercules Cluster: 29° up in the northwest, when it sets and rises, and a finder chart with a dashed star-hop line from Rutilicus through the cluster and a 5° finderscope circle around it" width="250">
+</p>
 
 ## What it does
 
@@ -38,8 +44,37 @@ It is one HTML page plus a few data files, with no build step and no server code
 - **Time zones.** Every time is shown in the observing location's own time zone, whatever the device is set to.
 - **Difficulty ratings are a rule of thumb:**
   - **Galaxies and nebulae:** the object's surface brightness is compared with the sky's, helped by aperture and penalized by moonlight. For big objects the rating uses the bright core, which is what you see first.
-  - **Double stars:** rated by the power needed to split them (roughly 240 ÷ separation in arcseconds) against your telescope's resolving limit.
+  - **Double stars:** rated by the power needed to split them (roughly 240 ÷ separation in arcseconds), against your telescope's resolving limit and the highest power your eyepieces reach.
 - **Star-hops.** Starhop looks for two bright stars with the target on or near the line between them, preferring short, bright, well-aligned pairs. When there is no such pair, it falls back to the nearest bright star.
+
+## Running it
+
+It's a static site: one HTML page plus a few data files, with no build step and no server code. Host the folder anywhere static, or serve it from here:
+
+```sh
+python3 -m http.server        # then open http://localhost:8000
+npm test                      # uses the page in Chromium through Playwright, with the place and date pinned so the sky is the same every run
+npm install                   # once, for the PNG encoder the screenshots use (upng-js)
+node tools/screenshots.mjs    # redraws docs/*.png and og.png
+node tools/make-icons.mjs     # redraws the PNG icons from icon.svg
+python3 tools/build_data.py   # rebuilds data/; the steps to fetch its sources are at the top of the script
+```
+
+Opening `index.html` straight from disk won't work, because browsers block reading the data files that way. Pointing at the sky and **Use my location** need a secure address: https, or localhost.
+
+To put it online with GitHub Pages: **Settings → Pages → Build and deployment → Deploy from a branch**, then pick `main` and `/ (root)`. The `CNAME` file gives it its own address.
+
+### Files
+
+- `index.html`: the whole app: the sky map, the night's timeline, tonight's summary, the targets and their ratings, the object cards with their finder charts, star-hops and eyepiece views, and the telescope and location sheets. Your settings are kept in the browser's localStorage.
+- `js/astronomy.browser.min.js`: [Astronomy Engine](https://github.com/cosinekitty/astronomy) 2.1.19 (MIT), served from here.
+- `data/`: the stars, constellations, deep-sky objects, Milky Way and cities, built by `tools/build_data.py`. [data/SOURCES.md](data/SOURCES.md) has their licenses.
+- `fonts/`: Atkinson Hyperlegible, DM Mono and IM Fell English (SIL Open Font License), served from here so nothing loads from elsewhere.
+- `sw.js`: keeps the page, the library, the data files and the fonts for using offline.
+- `carry.js`: brings your settings over from Starhop's old address, junkdrawer.works/starhop, the first time it opens here.
+- `manifest.webmanifest`, `icon.svg` and the `icon-*.png` icons let it install; `og.png` is the link preview.
+- `tools/`: `build_data.py` and `wgsn.tsv` for the data, `screenshots.mjs`, and `make-icons.mjs` with `icon-full-bleed.svg`.
+- `test/e2e.mjs`: the test, which drives the real page in Chromium.
 
 ## Data
 

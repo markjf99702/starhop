@@ -5,5 +5,8 @@
   "description": "What’s up tonight from where you are, what’s worth pointing a telescope at, and how to star-hop to it.",
   "scripts": {
     "test": "node test/e2e.mjs"
+  },
+  "devDependencies": {
+    "upng-js": "^2.1.0"
   }
 }
