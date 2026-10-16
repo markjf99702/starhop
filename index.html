@@ -751,13 +751,14 @@ html.red .chart canvas{background:#050000}
         if (left >= 2) spots.push([left, L.y + L.dy]);
         if (!spots.length) spots.push([right, L.y + L.dy]); // no room either side: kept inside below
       }
+      var pad = L.center ? px * 0.6 : 1; // italic constellation names lean past their width, so they keep a wider gap
       for (var j = 0; j < spots.length; j++) {
-        var x0 = clamp(spots[j][0], 2, Math.max(2, w - 2 - tw));
+        var x0 = clamp(spots[j][0], pad + 1, Math.max(pad + 1, w - pad - 1 - tw));
         var by = spots[j][1]; by += Math.max(0, 1 - (by - asc)); by -= Math.max(0, by + desc - (h - 1));
-        var b = { x: x0 - 1, y: by - asc - 1, w: tw + 2, h: asc + desc + 2 };
+        var b = { x: x0 - pad, y: by - asc - 1, w: tw + 2 * pad, h: asc + desc + 2 };
         if (!clear(b)) continue;
         g.fillStyle = L.color; g.fillText(L.t, x0, by);
-        keep.push(b); placed.push({ t: L.t, x: b.x, y: b.y, w: b.w, h: b.h, ax: L.x, ay: L.y });
+        keep.push(b); placed.push({ t: L.t, x: x0 - 1, y: b.y, w: tw + 2, h: b.h, ax: L.x, ay: L.y });
         break;
       }
     });

@@ -241,6 +241,11 @@ check('chart labels stay inside, keep apart, keep off the map’s buttons and th
     const { labels, w, h, keep } = await mapLabels(page);
     assert.ok(['N', 'E', 'S', 'W'].some(d => labels.some(l => l.t === d)), 'the compass letters are counted with the labels');
     checkLabels(labels, w, h, keep, 'phone map from Chicago');
+    // Italic constellation names lean past their width, so ARIES and ANDROMEDA used to run together into one word.
+    for (const c of labels.filter(l => /\u200a/.test(l.t))) for (const l of labels) if (l !== c && c.y < l.y + l.h && l.y < c.y + c.h) {
+      const gap = Math.max(l.x - (c.x + c.w), c.x - (l.x + l.w));
+      assert.ok(gap >= 6, `"${c.t}" and "${l.t}" are only ${gap.toFixed(1)}px apart`);
+    }
     assert.deepEqual(problems, []);
   } finally { await ctx.close(); }
   ({ ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false }));
