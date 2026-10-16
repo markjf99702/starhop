@@ -539,7 +539,9 @@ check('a double star is rated, advised and sketched by the same power, the one y
 
 // Taps an object on the sky map: a planet by name, or a star by its index in data/stars.json.
 const tapMap = async (page, k, id) => {
-  const hit = await page.evaluate(([k, id]) => document.getElementById('sky').__hits().find(h => h.obj.k === k && (h.obj.id === id || h.obj.i === id)), [k, id]);
+  // The map draws a moment after the page is ready, so wait for the object to be on it.
+  const hit = await page.waitForFunction(([k, id]) => document.getElementById('sky').__hits().find(h => h.obj.k === k && (h.obj.id === id || h.obj.i === id)), [k, id], { timeout: 10000 })
+    .then(h => h.jsonValue(), () => null);
   assert.ok(hit, `${k} ${id} is on the map`);
   const box = await page.locator('#sky').boundingBox();
   await page.mouse.click(box.x + hit.x, box.y + hit.y);
