@@ -256,6 +256,26 @@ check("typed coordinates take a decimal comma and a real minus sign, and refuse 
   } finally { await ctx.close(); }
 });
 
+check('the location sheet can close before its list of places arrives', async () => {
+  const { ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  try {
+    let release; const held = new Promise(r => { release = r; });
+    await page.route('**/data/cities.json', async route => { await held; await route.continue(); });
+    await page.click('#locBtn');
+    await page.keyboard.press('Escape');
+    const arrived = page.waitForResponse(r => r.url().endsWith('data/cities.json'));
+    release();
+    await arrived;
+    await page.waitForTimeout(300);
+    assert.equal(await sheetOpen(page), false);
+    assert.deepEqual(problems, [], 'no errors once the places arrive');
+    await page.click('#locBtn');
+    await page.fill('#lq', 'Tucs');
+    await page.waitForFunction(() => /Tucson/.test(document.getElementById('lres').textContent), null, { timeout: 10000 });
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 // Chromium reports some zones by older names (Asia/Calcutta, America/Indianapolis, Europe/Kiev).
 check('a first visit guesses the place from the time zone, older zone names too', async () => {
   for (const [zone, place] of [['Asia/Kolkata', 'Mumbai, IN'], ['America/Indiana/Indianapolis', 'Indianapolis, IN'], ['Europe/Kyiv', 'Kyiv, UA'], ['America/Phoenix', 'Phoenix, AZ']]) {

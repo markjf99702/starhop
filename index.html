@@ -1586,10 +1586,11 @@ html.red .chart canvas{background:#050000}
       '<div class="card"><h3>Or enter exact coordinates</h3><div class="grid2"><label class="fld"><span>Latitude</span><input id="lLat" inputmode="decimal" placeholder="30.27"></label><label class="fld"><span>Longitude</span><input id="lLon" inputmode="decimal" placeholder="-97.74"></label></div><p style="margin-top:8px;font-size:13px">North and east are positive. Your phone’s map app shows the numbers for a spot you tap.</p><div class="btnrow" style="margin-top:10px"><button class="btn sec sm" type="button" id="lUse">Use these coordinates</button></div></div></div>');
     if (S.loc) { $('lLat').value = S.loc.lat.toFixed(4); $('lLon').value = S.loc.lon.toFixed(4); }
     $('lres').innerHTML = '<p style="padding:10px 12px;margin:0;color:var(--ink2);font-size:13.5px">Loading places…</p>';
-    loadCities().then(function () { search(); }, function () { $('lres').innerHTML = '<p style="padding:10px 12px;margin:0;color:var(--ink2)">Couldn’t load the list of places — enter coordinates instead.</p>'; });
+    // The sheet can close before the places arrive, so each step checks it is still there.
+    loadCities().then(function () { search(); }, function () { if ($('lres')) $('lres').innerHTML = '<p style="padding:10px 12px;margin:0;color:var(--ink2)">Couldn’t load the list of places — enter coordinates instead.</p>'; });
     function search() {
+      if (!CITIES || !$('lq')) return;
       var q = fold($('lq').value.trim()), out = [];
-      if (!CITIES) return;
       if (q.length < 2) { $('lres').innerHTML = '<p style="padding:10px 12px;margin:0;color:var(--ink2);font-size:13.5px">Type at least two letters. ' + plural(CITIES.c.length, 'place') + ' to choose from.</p>'; return; }
       for (var i = 0; i < CITIES.c.length && out.length < 12; i++) { var c = CITIES.c[i], nm = fold(c[0]); if (nm.indexOf(q) === 0 || (q.length > 3 && nm.indexOf(q) >= 0)) out.push(c); }
       $('lres').innerHTML = out.length ? out.map(function (c, i) { return '<button type="button" data-i="' + CITIES.c.indexOf(c) + '"><span>' + esc(c[0]) + (c[1] ? ', ' + esc(c[1]) : '') + ' <span style="color:var(--ink3)">' + esc(c[2]) + '</span></span><small>' + c[3].toFixed(1) + '°, ' + c[4].toFixed(1) + '°</small></button>'; }).join('') : '<p style="padding:10px 12px;margin:0;color:var(--ink2);font-size:13.5px">No match — try a nearby larger town, or enter coordinates.</p>';
@@ -1614,7 +1615,7 @@ html.red .chart canvas{background:#050000}
       var near = null; if (CITIES) { var bd = 1e9; CITIES.c.forEach(function (c) { var d = Math.hypot(c[3] - la, (c[4] - lo) * Math.cos(la * D2R)); if (d < bd) { bd = d; near = c; } }); }
       applyLoc({ name: near && Math.hypot(near[3] - la, near[4] - lo) < 1 ? 'Near ' + near[0] : la.toFixed(2) + '°, ' + lo.toFixed(2) + '°', lat: la, lon: lo, tz: near ? CITIES.tz[near[6]] : (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') });
     });
-    setTimeout(function () { if (!('ontouchstart' in window)) $('lq').focus(); }, 50);
+    setTimeout(function () { if (!('ontouchstart' in window) && $('lq')) $('lq').focus(); }, 50);
   }
   function applyLoc(l) { setLoc(l); save(); $('locName').textContent = l.name; closeSheet(); SCN = {}; ANCHORS = ANCHORS; T.live = true; T.t = new Date(); setNight(currentNight(T.t), true); toast('Showing the sky over ' + l.name); }
   $('locBtn').addEventListener('click', locSheet);
