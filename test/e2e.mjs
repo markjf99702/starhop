@@ -392,6 +392,23 @@ check('a card says an object is wider than the field only when it is', async () 
   } finally { await ctx.close(); }
 });
 
+// Izar's stars are 3″ apart, which takes 80×. The example telescope's eyepieces reach 65×; the 8″ Dobsonian's reach 200×.
+check('a double star is rated, advised and sketched by the same power, the one your eyepieces reach', async () => {
+  for (const [save, label] of [[{ loc: AUSTIN }, 'Needs 80×'], [{ loc: AUSTIN, scope: DOB8 }, 'Easy split']]) {
+    const { ctx, page, problems } = await open({ save: JSON.stringify(save), time: '2026-06-15T22:00:00-05:00' });
+    try {
+      const split = label === 'Easy split', who = save.scope ? 'the 8″ Dobsonian' : 'the example telescope';
+      await page.click('#targetSec .filters [data-f="double"]');
+      assert.equal(await page.$eval('#targetSec .row[data-id="izar"] .rate', el => el.textContent), label, 'the list, ' + who);
+      await openCard(page, 'izar');
+      assert.match(await advice(page), split ? /about 80× splits them, so start with the 6 mm \(200×\)\.$/ : /takes about 80×; your highest power is 65×\./, 'the card, ' + who);
+      await page.waitForFunction(() => document.getElementById('epCap').textContent);
+      (split ? assert.doesNotMatch : assert.match)(await text(page, '#epCap'), /not split at this power/, 'the eyepiece sketch, ' + who);
+      assert.deepEqual(problems, []);
+    } finally { await ctx.close(); }
+  }
+});
+
 // Taps an object on the sky map: a planet by name, or a star by its index in data/stars.json.
 const tapMap = async (page, k, id) => {
   const hit = await page.evaluate(([k, id]) => document.getElementById('sky').__hits().find(h => h.obj.k === k && (h.obj.id === id || h.obj.i === id)), [k, id]);

@@ -614,12 +614,18 @@ html.red .chart canvas{background:#050000}
     var ap = S.scope.ap, nelm = sky().nelm;
     return { lm: nelm + 5 * Math.log10(ap / 7) - 0.6, dawes: 116 / ap, maxMag: Math.round(Math.min(2 * ap, 350)), fr: S.scope.fl / ap };
   }
+  // The power that splits a double star. The list's rating, the card's advice and the eyepiece sketch all go by it: an
+  // eyepiece splits the pair when it reaches this power.
+  function splitPower(o) { return Math.max(20, 240 / o.sep); }
+  function splits(r, o) { return r.M >= splitPower(o); }
   // How hard an object is: its surface brightness against the sky's, helped by aperture.
   function rating(o, moonUp) {
     if (o.k === 'double') {
-      var need = Math.max(20, 240 / o.sep), st = scopeStats();
+      var need = splitPower(o), st = scopeStats(), rows = epRows();
       if (o.sep < st.dawes * 1.1) return { r: 'hard', label: 'Too close', d: 9 };
-      return need > 90 ? { r: 'fair', label: 'Needs ' + Math.round(need / 10) * 10 + '×', d: 2 } : { r: 'easy', label: 'Easy split', d: 0.5 };
+      // without eyepieces entered, the telescope's highest useful power stands in for them
+      var can = rows.length ? rows.some(function (r) { return splits(r, o); }) : need <= st.maxMag;
+      return can ? { r: 'easy', label: 'Easy split', d: 0.5 } : { r: 'fair', label: 'Needs ' + Math.round(need) + '×', d: 2 };
     }
     if (o.mag == null) return { r: 'fair', label: 'Fair', d: 2 };
     var a0 = o.dim[0] || 1, b0 = o.dim[1] || a0, area = Math.max(0.3, Math.PI / 4 * a0 * b0), mag = o.mag;
@@ -1361,8 +1367,8 @@ html.red .chart canvas{background:#050000}
       return { txt: txt, pick: pick };
     }
     if (o.k === 'double') {
-      var need = Math.max(20, 240 / o.sep);
-      rows.forEach(function (r, i) { if (pick < 0 && r.M >= need && r.ok) pick = i; });
+      var need = splitPower(o);
+      rows.forEach(function (r, i) { if (pick < 0 && splits(r, o)) pick = i; });
       if (o.sep < st.dawes * 1.1) return { txt: 'At ' + o.sep + '″ these stars are closer than your telescope can split (about ' + st.dawes.toFixed(1) + '″).', pick: -1 };
       if (pick < 0) return { txt: 'Splitting a ' + o.sep + '″ pair takes about ' + Math.round(need) + '×; your highest power is ' + Math.round(rows[rows.length - 1].M) + '×. A shorter eyepiece or a 2× Barlow will do it.', pick: rows.length - 1 };
       return { txt: 'The two stars are ' + o.sep + '″ apart; about ' + Math.round(need) + '× splits them, so start with the ' + rows[pick].f + ' mm (' + Math.round(rows[pick].M) + '×).', pick: pick };
@@ -1500,7 +1506,7 @@ html.red .chart canvas{background:#050000}
       drawPhase(g, cx0, cy0, mr, sc.moon.illum, Math.atan2(sp[1], sp[0]), col('#EEE7D2', 1), col('#1B1F2B', 1));
     } else if (o.k === 'double') {
       var sepPx = o.sep / 60 * scale, cols = { albireo: ['#FFD27A', '#9EC0FF'], almach: ['#FFC27A', '#A8C4FF'], izar: ['#FFC98A', '#A9E0D8'], '61cyg': ['#FFB978', '#FFC98A'], algieba: ['#FFD89A', '#FFE0A8'] }[o.id] || ['#F4F2FF', '#DDE6FF'];
-      var spl = r.M >= Math.max(20, 240 / o.sep) * 0.8, drawSep = Math.max(12, sepPx);
+      var spl = splits(r, o), drawSep = Math.max(12, sepPx);
       g.fillStyle = col(cols[0], 1); g.beginPath(); g.arc(cx0 - (spl ? drawSep / 2 : 0), cy0, 3.2, 0, 2 * Math.PI); g.fill();
       if (spl) { g.fillStyle = col(cols[1], 1); g.beginPath(); g.arc(cx0 + drawSep / 2, cy0, 2.2, 0, 2 * Math.PI); g.fill(); if (sepPx < 12) cap += ' · the pair is drawn wider apart than it looks'; }
       else cap += ' · not split at this power';
