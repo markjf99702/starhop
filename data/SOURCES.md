@@ -21,6 +21,10 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
+## IAU Working Group on Star Names
+
+`tools/wgsn.tsv` lists the star names adopted by the IAU Working Group on Star Names (WGSN), from the IAU Catalog of Star Names at https://exopla.net/star-names/modern-iau-star-names/ as of October 2026. `build_data.py` uses it to keep each traditional name in `stars.json` on the one star the WGSN gives it to, where d3-celestial gives it to several. IAU star names are free to use and in the public domain.
+
 ## city-timezones
 
 `cities.json` and `tzcity.json` come from city-timezones 1.3.4 by Kevin Roberts, released under the MIT License:

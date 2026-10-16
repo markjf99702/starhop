@@ -1,0 +1,647 @@
+# Star names adopted by the IAU Working Group on Star Names (WGSN). build_data.py keeps a proper name from
+# d3-celestial only on the star the WGSN gives it to.
+# From the IAU Catalog of Star Names on the WGSN's site, https://exopla.net/star-names/modern-iau-star-names/,
+# as of 2026-10-16 (its newest names were adopted on 2026-09-22). Mesarthim's HIP number, blank there, is from
+# the catalog's text edition of 2022-04-04: https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt
+# IAU star names are free to use and in the public domain. "-" marks a star with no HIP number.
+# HIP	name	designation	constellation	adopted
+-	Absolutno	XO-5	Lyn	2019-12-17
+13847	Acamar	θ1 Eri	Eri	2016-07-20
+7588	Achernar	α Eri	Eri	2016-06-30
+3821	Achird	η Cas	Cas	2017-09-05
+78820	Acrab	β1 Sco	Sco	2016-08-21
+60718	Acrux	α Cru	Cru	2016-07-20
+44066	Acubens	α Cnc	Cnc	2016-07-20
+50335	Adhafera	ζ Leo	Leo	2016-07-20
+33579	Adhara	ε CMa	CMa	2016-08-21
+6411	Adhil	ξ And	And	2016-08-21
+105140	Aerostaticus	ε Mic	Mic	2026-07-16
+20889	Ain	ε Tau	Tau	2015-12-15
+92761	Ainalrami	ν1 Sgr	Sgr	2017-09-05
+53524	Aiolos	HD 95086	Car	2023-08-01
+94481	Aladfar	η Lyr	Lyr	2017-09-05
+90004	Alasia	HD 168746	Ser	2019-12-17
+10064	Alaybasan	β Tri	Tri	2025-11-07
+94141	Albaldah	π Sgr	Sgr	2017-09-05
+102618	Albali	ε Aqr	Aqr	2016-09-12
+95947	Albireo	β Cyg	Cyg	2016-07-20
+59199	Alchiba	α Crv	Crv	2016-09-12
+65477	Alcor	80 UMa	UMa	2016-06-30
+17702	Alcyone	η Tau	Tau	2016-06-30
+21421	Aldebaran	α Tau	Tau	2016-06-30
+105199	Alderamin	α Cep	Cep	2016-07-20
+108085	Aldhanab	γ Gru	Gru	2017-09-05
+83895	Aldhibah	ζ Dra	Dra	2017-09-05
+18532	Áldu	ϵ Per	Per	2025-12-25
+101421	Aldulfin	ε Del	Del	2017-09-05
+113726	Alfarasalkamil	ο And	And	2025-05-08
+106032	Alfirk	β Cep	Cep	2016-08-21
+100064	Algedi	α2 Cap	Cap	2016-08-21
+1067	Algenib	γ Peg	Peg	2016-06-30
+50583	Algieba	γ1 Leo	Leo	2016-07-20
+14576	Algol	β Per	Per	2016-06-30
+60965	Algorab	δ Crv	Crv	2016-07-20
+31681	Alhena	γ Gem	Gem	2016-07-20
+62956	Alioth	ε UMa	UMa	2016-06-30
+102488	Aljanah	ε Cyg	Cyg	2016-06-30
+67301	Alkaid	η UMa	UMa	2016-06-30
+75411	Alkalurops	μ Boo	Boo	2016-08-21
+44471	Alkaphrah	κ UMa	UMa	2017-09-05
+115623	Alkarab	υ Peg	Peg	2017-09-05
+53740	Alkes	α Crt	Crt	2016-09-12
+23416	Almaaz	ε Aur	Aur	2017-02-01
+9640	Almach	γ And	And	2016-07-20
+98110	Almighzal	η Cyg	Cyg	2026-07-16
+109268	Alnair	α Gru	Gru	2016-07-20
+88635	Alnasl	γ2 Sgr	Sgr	2016-08-21
+26311	Alnilam	ε Ori	Ori	2016-07-20
+26727	Alnitak	ζ Ori	Ori	2016-07-20
+80112	Alniyat	σ Sco	Sco	2017-02-01
+46390	Alphard	α Hya	Hya	2016-07-20
+76267	Alphecca	α CrB	CrB	2016-07-20
+677	Alpheratz	α And	And	2016-06-30
+7097	Alpherg	η Psc	Psc	2018-06-01
+93683	Alqiladah	ο Sgr	Sgr	2026-08-13
+94160	Alqubba	β CrA	CrA	2026-08-13
+83608	Alrakis	μ Dra	Dra	2017-02-01
+9487	Alrescha	α Psc	Psc	2016-08-21
+86782	Alruba	HR 6618	Dra	2018-06-01
+71995	Alrumh	34 Bootis	Boo	2026-04-15
+96100	Alsafi	σ Dra	Dra	2017-06-30
+110538	Alsamaka	β Lac	Lac	2026-08-13
+41075	Alsciaukat	31 Lyn	Lyn	2017-06-30
+42913	Alsephina	δ Vel	Vel	2017-09-05
+98036	Alshain	β Aql	Aql	2016-08-21
+100310	Alshat	ν Cap	Cap	2017-06-30
+97649	Altair	α Aql	Aql	2016-06-30
+94376	Altais	δ Dra	Dra	2016-08-21
+46750	Alterf	λ Leo	Leo	2017-02-01
+35904	Aludra	η CMa	CMa	2016-07-20
+55203	Alula Australis	ξ UMa	UMa	2016-07-20
+55219	Alula Borealis	ν UMa	UMa	2016-07-20
+91014	Alwasl	HIP 91014	Sgr	2026-08-13
+92946	Alya	θ1 Ser	Ser	2016-08-21
+32362	Alzirr	ξ Gem	Gem	2017-06-30
+29550	Amadioha	HD 43197	CMa	2019-12-17
+-	Amansinaya	WASP-34	Crt	2019-12-17
+-	Anadolu	WASP-52	Peg	2019-12-17
+47780	Añañuca	GJ 367	Vel	2023-08-01
+110003	Ancha	θ Aqr	Aqr	2016-09-12
+13288	Angetenar	τ2 Eri	Eri	2017-06-30
+57820	Aniara	HD 102956	UMa	2019-12-17
+2081	Ankaa	α Phe	Phe	2016-07-20
+95771	Anser	α Vul	Vul	2017-06-30
+80763	Antares	α Sco	Sco	2016-06-30
+99473	Antinous	θ Aql	Aql	2024-06-06
+66006	Apamvatsa	74 Vir	Vir	2025-10-16
+10670	Apdu	γ Tri	Tri	2025-11-13
+72845	Arcalís	HD 131496	Boo	2019-12-17
+69673	Arcturus	α Boo	Boo	2016-06-30
+93244	Arin-majlep	ε Aql	Aql	2026-06-18
+95294	Arkab Posterior	β2 Sgr	Sgr	2016-10-05
+95241	Arkab Prior	β1 Sgr	Sgr	2016-10-05
+25985	Arneb	α Lep	Lep	2016-07-20
+93506	Ascella	ζ Sgr	Sgr	2016-09-12
+42911	Asellus Australis	δ Cnc	Cnc	2016-11-06
+42806	Asellus Borealis	γ Cnc	Cnc	2016-11-06
+43109	Ashlesha	ε Hya	Hya	2018-06-01
+45556	Aspidiske	ι Car	Car	2016-07-20
+17579	Asterope	21 Tau	Tau	2016-08-21
+79992	Asuusiha	τ Her	Her	2026-05-14
+-	Atakoraka	WASP-64	CMa	2019-12-17
+80331	Athebyne	η Dra	Dra	2017-09-05
+17448	Atik	ο Per	Per	2016-09-12
+17847	Atlas	27 Tau	Tau	2016-08-21
+82273	Atria	α TrA	TrA	2016-07-20
+78493	Aurwandilsta	ι CrB	CrB	2026-05-14
+41037	Avior	ε Car	Car	2016-07-20
+118319	Axólotl	HD 224693	Cet	2019-12-17
+13993	Ayeyarwady	HD 18742	Eri	2019-12-17
+107136	Azelfafage	π1 Cyg	Cyg	2016-09-12
+13701	Azha	η Eri	Eri	2016-09-12
+38170	Azmidi	ξ Pup	Pup	2018-06-01
+24305	Bade	μ Lep	Lep	2026-03-22
+73136	Baekdu	8 UMi	UMi	2019-12-17
+28358	Bagu	δ Aur	Aur	2025-11-13
+107380	Baijiu	ι PsA	PsA	2026-09-17
+-	Bajamar Star	2MASS J20555125+4352246	Cyg	2026-04-18
+87108	Bake-eo	γ Oph	Oph	2024-08-20
+76952	Baltesha	γ CrB A	CrB	2026-05-14
+87937	Barnard's Star	V2500 Oph	Oph	2017-02-01
+8645	Baten Kaitos	ζ Cet	Cet	2016-09-12
+-	Batsũ̀	LHS 3844	Ind	2023-08-01
+-	Beehive Proplyd	HH 540	Ori	2026-06-13
+20535	Beemim	υ3 Eri	Eri	2017-06-30
+19587	Beid	ο1 Eri	Eri	2016-09-12
+95124	Belel	HD 181342	Sgr	2019-12-17
+6643	Bélénos	HD 8574	Psc	2019-12-17
+25336	Bellatrix	γ Ori	Ori	2016-06-30
+-	Berehynia	HAT-P-15	Per	2019-12-17
+27989	Betelgeuse	α Ori	Ori	2016-06-30
+13209	Bharani	41 Ari	Ari	2017-06-30
+48711	Bibhā	HD 86081	Sex	2019-12-17
+18724	Bibing	λ Tau	Tau	2026-05-17
+90982	Bie	θ CrA	CrA	2026-08-13
+109427	Biham	θ Peg	Peg	2016-08-21
+78322	Blaze Star	T CrB	CrB	2025-09-22
+88267	Bodu	95 Her	Her	2025-06-17
+107251	Bosona	HD 206610	Aqr	2019-12-17
+14838	Botein	δ Ari	Ari	2016-09-12
+73714	Brachium	σ Lib	Lib	2017-09-05
+26380	Bubup	HD 38283	Men	2019-12-17
+12191	Buna	HD 16175	And	2019-12-17
+106786	Bunda	ξ Aqr	Aqr	2018-06-01
+5824	Buranun	88 Psc	Psc	2026-09-17
+-	Butterfly Star	IRAS 04302+2247	Tau	2026-06-13
+-	Calvera	PSR J1412+7922	UMi	2026-04-18
+30438	Canopus	α Car	Car	2016-06-30
+24608	Capella	α Aur	Aur	2016-06-30
+746	Caph	β Cas	Cas	2016-06-30
+36850	Castor	α Gem	Gem	2016-06-30
+4422	Castula	υ2 Cas	Cas	2017-09-05
+86742	Cebalrai	β Oph	Oph	2016-08-21
+37284	Ceibo	HD 63454	Cha	2019-12-17
+17489	Celaeno	16 Tau	Tau	2016-08-21
+86796	Cervantes	μ Ara	Ara	2015-12-15
+2599	Cexing	κ Cas	Cas	2025-11-13
+53721	Chalawan	47 UMa	UMa	2015-12-15
+20894	Chamukuy	θ2 Tau	Tau	2017-09-05
+-	Chaophraya	WASP-50	Eri	2019-12-17
+61317	Chara	β CVn	CVn	2016-07-20
+-	Chasoň	HAT-P-5	Lyr	2019-12-17
+99894	Chechia	HD 192699	Aql	2019-12-17
+54879	Chertan	θ Leo	Leo	2016-07-20
+1547	Citadelle	HD 1502	Psc	2019-12-17
+33719	Citalá	HD 52265	Mon	2019-12-17
+3479	Cocibolca	HD 4208	Scl	2019-12-17
+43587	Copernicus	55 Cnc	Cnc	2016-07-20
+63125	Cor Caroli	α2 CVn	CVn	2016-07-20
+80463	Cujam	ω Her	Her	2017-02-01
+23875	Cursa	β Eri	Eri	2016-07-20
+17884	Custos	BE Cam	Cam	2025-12-25
+100345	Dabih	β1 Cap	Cap	2016-08-21
+8068	Dajiangjunbei	φ Per	Per	2025-08-25
+14879	Dalim	α For	For	2017-09-05
+115211	Danfeng	L 168-9	Tuc	2023-08-01
+27288	Darlugal	ζ Lep	Lep	2026-03-22
+10644	Deltoton	δ Tri	Tri	2025-06-17
+102098	Deneb	α Cyg	Cyg	2016-06-30
+107556	Deneb Algedi	δ Cap	Cap	2017-02-01
+57632	Denebola	β Leo	Leo	2016-06-30
+102531	Dhanishta	γ1 Del	Del	2026-07-16
+88567	Dhanuśarāgra	γ1 Sgr	Sgr	2026-08-13
+64241	Diadem	α Com	Com	2017-02-01
+-	Dilmun	WASP-121	Pup	2023-08-01
+54158	Dingolay	HD 96063	Leo	2019-12-17
+3419	Diphda	β Cet	Cet	2016-08-21
+-	Dìwö	WASP-17	Sco	2019-12-17
+-	Diya	WASP-72	For	2019-12-17
+66047	Dofida	HD 117618	Cen	2019-12-17
+-	Dombay	HAT-P-3	UMa	2019-12-17
+78401	Dschubba	δ Sco	Sco	2016-08-21
+54061	Dubhe	α UMa	UMa	2016-06-30
+-	Dust-Ball	V* V927 Per	Per	2026-06-13
+86614	Dziban	ψ1 Dra	Dra	2017-09-05
+114322	Ebla	HD 218566	Psc	2019-12-17
+75458	Edasich	ι Dra	Dra	2015-12-15
+17499	Electra	17 Tau	Tau	2016-08-21
+70755	Elgafar	ϕ Vir	Vir	2018-06-01
+29034	Elkurud	θ Col	Col	2018-06-01
+25428	Elnath	β Tau	Tau	2016-07-20
+87833	Eltanin	γ Dra	Dra	2016-08-21
+5529	Emiw	HD 7199	Tuc	2019-12-17
+104887	Enduri Senggu	τ Cyg	Cyg	2026-07-16
+107315	Enif	ε Peg	Peg	2016-07-20
+116727	Errai	γ Cep	Cep	2015-12-15
+90344	Fafnir	42 Dra	Dra	2015-12-15
+78265	Fang	π Sco	Sco	2017-06-30
+97165	Fawaris	δ Cyg	Cyg	2018-06-01
+48615	Felis	HR 3923	Hya	2018-06-01
+2247	Felixvarela	BD-17 63	Cet	2019-12-17
+111497	Fenmu	η Aqr	Aqr	2026-09-17
+-	Filetdor	WASP-166	Hya	2023-08-01
+57370	Flegetonte	HD 102195	Vir	2019-12-17
+-	Flying Saucer	2MASS J16281370-2431391	Oph	2026-06-13
+113368	Fomalhaut	α PsA	PsA	2015-12-15
+56508	Formosa	HD 100655	Leo	2019-12-17
+-	Franz	HAT-P-14	Her	2019-12-17
+-	Frosty Leo	IRAS 09371+1212	Leo	2026-06-13
+2920	Fulu	ζ Cas	Cas	2017-06-30
+113889	Fumalsamakah	β Psc	Psc	2018-06-01
+61177	Funi	HD 109246	Dra	2019-12-17
+30122	Furud	ζ CMa	CMa	2016-07-20
+87261	Fuyue	G Sco	Sco	2017-06-30
+61084	Gacrux	γ Cru	Cru	2016-07-20
+21881	Gaja	τ Tau	Tau	2026-02-22
+42446	Gakyid	HD 73534	Cnc	2019-12-17
+9598	Gang	50 Cas	Cas	2025-12-25
+62452	Gar	GJ 486	Vir	2023-08-01
+107259	Garnet Star	µ Cep	Cep	2024-09-19
+-	Geminga	PSR B0633+17	Gem	2022-04-04
+71284	Genghe	σ Bootis	Boo	2026-04-15
+56211	Giausar	λ Dra	Dra	2017-02-01
+59803	Gienah	γ Crv	Crv	2016-11-06
+60260	Ginan	ε Cru	Cru	2017-11-17
+-	Gloas	WASP-13	Lyn	2019-12-17
+-	Gnomon	WASP-43	Sex	2023-08-01
+36188	Gomeisa	β CMi	CMi	2016-07-20
+98688	Gouguo	c Sgr	Sgr	2026-08-13
+87585	Grumium	ξ Dra	Dra	2016-09-12
+-	Guahayona	HAT-P-26	Vir	2023-08-01
+76127	Guansuo	θ CrB A	CrB	2026-05-14
+77450	Gudja	κ Ser	Ser	2018-08-10
+94645	Gumala	V5652 Sgr	Sgr	2019-12-17
+84405	Guniibuu	36 Oph	Oph	2018-08-10
+95501	Guqi	δ Aql	Aql	2026-06-18
+68702	Hadar	β Cen	Cen	2016-08-21
+23767	Haedus	η Aur	Aur	2017-06-30
+9884	Hamal	α Ari	Ari	2016-07-20
+23015	Hassaleh	ι Aur	Aur	2017-06-30
+26241	Hatysa	ι Ori	Ori	2017-09-05
+113357	Helvetios	51 Peg	Peg	2015-12-15
+67464	Heng	ν Cen	Cen	2025-03-16
+89642	Heryibwia	η Sgr	Sgr	2026-08-13
+66249	Heze	ζ Vir	Vir	2018-06-01
+29271	Hoerikwaggo	α Men	Men	2024-12-12
+21109	Hoggar	HD 28678	Tau	2019-12-17
+-	Holoea	IRAS 05327+3404	Aur	2026-04-18
+112029	Homam	ζ Peg	Peg	2016-08-21
+114570	Honores	7 And	And	2025-05-14
+-	Horna	HAT-P-38	Tri	2019-12-17
+96665	Hru	σ Aql	Aql	2026-06-18
+11569	Huagai	ι Cas	Cas	2025-12-25
+55174	Hunahpú	HD 98219	Crt	2019-12-17
+80076	Hunor	HAT-P-2	Her	2019-12-17
+301	Hydor	2 Cet	Cet	2025-08-25
+7535	Idigna	π Psc	Psc	2026-09-17
+78104	Iklil	ρ Sco	Sco	2017-09-05
+47087	Illyrian	HD 82886	LMi	2019-12-17
+59747	Imai	δ Cru	Cru	2018-08-10
+84787	Inquill	HD 156411	Ara	2019-12-17
+15578	Intan	HD 20868	For	2019-12-17
+46471	Intercrus	HR 3743	UMa	2015-12-15
+-	Irena	WASP-38	Her	2019-12-17
+108375	Itonda	HD 208487	Gru	2019-12-17
+72105	Izar	ε Boo	Boo	2016-08-21
+79374	Jabbah	ν Sco	Sco	2017-06-30
+93085	Jian	ξ2 Sgr	Sgr	2026-08-13
+92791	Jiantai	δ2 Lyr	Lyr	2026-06-18
+37265	Jishui	ο Gem	Gem	2019-12-17
+109176	Jiu	ι Peg	Peg	2026-08-13
+66458	Jordanus	25 CVn	CVn	2026-09-17
+5434	Junnanmen	φ And	And	2025-08-25
+-	Kaewkosin	GJ 3470	Cnc	2023-08-01
+12706	Kaffaljidhma	γ Cet	Cet	2017-02-01
+116805	Kaffalmusalsala	κ And	And	2025-05-08
+71053	Kalasungsang	ρ Bootis	Boo	2026-04-15
+47202	Kalausi	HD 83443	Vel	2019-12-17
+31940	Kamelos	HR 2363	Cam	2025-12-25
+79219	Kamuy	HD 145457	CrB	2019-12-17
+69427	Kang	κ Vir	Vir	2017-06-30
+76351	Karaka	HD 137388	Aps	2019-12-17
+90185	Kaus Australis	ε Sgr	Sgr	2016-07-20
+90496	Kaus Borealis	λ Sgr	Sgr	2016-07-20
+89931	Kaus Media	δ Sgr	Sgr	2016-07-20
+91971	Kautoki	ζ1 Lyr	Lyr	2026-06-18
+92895	Kaveh	HD 175541	Ser	2019-12-17
+19849	Keid	ο2 Eri	Eri	2016-09-12
+95168	Kenemu	ρ1 Sgr	Sgr	2026-08-13
+69974	Khambalia	λ Vir	Vir	2017-09-05
+83207	Khepdenreret	ϵ Her	Her	2026-05-14
+104987	Kitalpha	α Equ	Equ	2016-08-21
+72607	Kochab	β UMi	UMi	2016-07-20
+12961	Koeia	HIP 12961	Eri	2019-12-17
+-	Koit	XO-4	Lyn	2019-12-17
+-	Komondor	HAT-P-12	CVn	2023-08-01
+80816	Kornephoros	β Her	Her	2016-08-21
+-	Kosjenka	WASP-63	Col	2023-08-01
+61359	Kraz	β Crv	Crv	2018-06-01
+-	Krios	HD 240429	Cas	2026-03-22
+-	Kronos	HD 240430	Cas	2026-03-22
+4463	Kui	η And	And	2025-04-06
+65109	Kulou	ι Cen	Cen	2025-02-17
+108917	Kurhah	ξ Cep	Cep	2016-09-12
+62223	La Superba	Y CVn	CVn	2018-08-10
+110130	Lang-Exster	α Tuc	Tuc	2024-09-19
+82396	Larawag	ε Sco	Sco	2017-11-17
+68002	Leepwal	ζ Cen	Cen	2024-07-18
+113186	Leidian	ρ Peg	Peg	2026-08-13
+22565	Lembu	97 Tau	Tau	2026-05-17
+-	Lerna	HAT-P-42	Hya	2019-12-17
+85696	Lesath	υ Sco	Sco	2016-08-21
+97938	Libertas	ξ Aql	Aql	2015-12-15
+-	Lich	PSR B1257+12	Vir	2015-12-15
+66192	Liesma	HD 118203	UMa	2019-12-17
+112440	Ligong	λ Peg	Peg	2026-08-13
+13061	Lilii Borea	39 Ari	Ari	2017-09-05
+112716	Lintangkumba	τ2 Aqr	Aqr	2026-09-22
+110813	Lionrock	HD 212771	Aqr	2019-12-17
+30860	Lucilinburhuc	HD 45350	Aur	2019-12-17
+61966	Lumbung	39 Cru	Cru	2026-02-22
+30905	Lusitânia	HD 45652	Mon	2019-12-17
+85693	Maasym	λ Her	Her	2016-09-12
+52521	Macondo	HD 93083	Ant	2019-12-17
+72220	Maenalus	109 Virginis	Vir	2026-04-15
+24003	Mago	HD 32518	Cam	2019-12-17
+90037	Magur	HIP 90037	CrA	2026-08-13
+28380	Mahasim	θ Aur	Aur	2017-06-30
+82651	Mahsati	HD 152581	Oph	2019-12-17
+17573	Maia	20 Tau	Tau	2016-07-20
+-	Malmok	V732 Vir	Vir	2019-12-17
+80883	Marfik	λ Oph	Oph	2016-09-12
+113963	Markab	α Peg	Peg	2017-06-30
+45941	Markeb	κ Vel	Vel	2017-09-05
+-	Márohu	WASP-6	Aqr	2019-12-17
+79043	Marsic	κ Her	Her	2017-02-01
+-	Maru	WD 0806-661	Vol	2023-08-01
+112158	Matar	η Peg	Peg	2016-08-21
+77512	Matrichakra	δ CrB	CrB	2026-05-14
+65426	Matza	HIP 65426	Cen	2023-08-01
+-	Mazaalai	HAT-P-21	UMa	2020-02-24
+32246	Mebsuta	ε Gem	Gem	2016-07-20
+59774	Megrez	δ UMa	UMa	2016-06-30
+26207	Meissa	λ Ori	Ori	2016-07-20
+34088	Mekbuda	ζ Gem	Gem	2016-09-12
+42556	Meleph	ε Cnc	Cnc	2017-09-05
+28360	Menkalinan	β Aur	Aur	2016-07-20
+14135	Menkar	α Cet	Cet	2016-06-30
+68933	Menkent	θ Cen	Cen	2016-08-21
+18614	Menkib	ξ Per	Per	2016-09-12
+53910	Merak	β UMa	UMa	2016-06-30
+72487	Merga	38 Boo	Boo	2016-09-12
+94114	Meridiana	α CrA	CrA	2017-09-05
+17608	Merope	23 Tau	Tau	2016-07-20
+8832	Mesarthim	γ Ari	Ari	2016-08-21
+45238	Miaplacidus	β Car	Car	2016-07-20
+62434	Mimosa	β Cru	Cru	2016-07-20
+42402	Minchir	σ Hya	Hya	2017-09-05
+63090	Minelauva	δ Vir	Vir	2017-06-30
+25930	Mintaka	δ Ori	Ori	2016-07-20
+10826	Mira	ο Cet	Cet	2016-06-30
+5447	Mirach	β And	And	2016-06-30
+13268	Miram	η Per	Per	2017-09-05
+15863	Mirfak	α Per	Per	2016-07-20
+30324	Mirzam	β CMa	CMa	2016-07-20
+14668	Misam	κ Per	Per	2017-09-05
+65378	Mizar	ζ UMa	UMa	2016-06-30
+-	Moldoveanu	XO-1	CrB	2019-12-17
+72339	Mönch	HD 130322	Vir	2019-12-17
+-	Montuno	WASP-79	Eri	2019-12-17
+-	Morava	WASP-60	Peg	2019-12-17
+-	Moriah	HAT-P-23	Del	2019-12-17
+36948	Moth	HD 61005	Pup	2026-06-13
+8796	Mothallah	α Tri	Tri	2016-08-21
+22491	Mouhoun	HD 30856	Eri	2019-12-17
+-	Mpingo	WASP-71	Cet	2019-12-17
+34045	Muliphein	γ CMa	CMa	2016-08-21
+78072	Muning	γ Ser	Ser	2026-07-01
+67927	Muphrid	η Boo	Boo	2016-09-12
+41704	Muscida	ο UMa	UMa	2016-07-20
+103527	Musica	18 Del	Del	2015-12-15
+-	Muspelheim	HAT-P-29	Per	2019-12-17
+64962	Naga	γ Hya	Hya	2026-02-22
+44946	Nahn	ξ Cnc	Cnc	2018-06-01
+-	Naledi	WASP-62	Dor	2019-12-17
+92041	Nandou	φ Sgr	Sgr	2026-08-13
+39429	Naos	ζ Pup	Pup	2016-08-21
+106985	Nashira	γ Cap	Cap	2016-08-21
+40687	Násti	HD 68988	UMa	2019-12-17
+48235	Natasha	HD 85390	Vel	2019-12-17
+-	Necklace	IRAS 19417+1701	Sge	2026-06-13
+109410	Neichu	π2 Peg	Peg	2026-08-13
+73555	Nekkar	β Boo	Boo	2016-08-21
+7607	Nembus	51 And	And	2017-09-05
+5054	Nenque	HD 6434	Phe	2019-12-17
+32916	Nervia	HD 49674	Aur	2019-12-17
+33856	Nganurganity	σ CMa	CMa	2017-09-05
+92862	Niandao	13 Lyr	Lyr	2026-06-18
+25606	Nihal	β Lep	Lep	2016-07-20
+74961	Nikawiy	HD 136418	Boo	2019-12-17
+94713	Ninnisig	θ Lyr	Lyr	2026-06-18
+57087	Noquisi	GJ 436	Leo	2023-08-01
+31895	Nosaxa	HD 48265	Pup	2019-12-17
+84380	Nüchuang	π Her	Her	2026-05-14
+92855	Nunki	σ Sgr	Sgr	2016-08-21
+75695	Nusakan	β CrB	CrB	2016-09-12
+13192	Nushagak	HD 17156	Cas	2019-12-17
+-	Nyamien	WASP-15	Cen	2019-12-17
+80838	Ogma	HD 149026	Her	2015-12-15
+93747	Okab	ζ Aql	Aql	2018-06-01
+-	Orkaria	GJ 1214	Oph	2023-08-01
+92845	Pabilsang	ν2 Sgr	Sgr	2026-08-13
+97804	Pagru	η Aql	Aql	2026-06-18
+81266	Paikauhale	τ Sco	Sco	2018-08-10
+-	Paloma	2MASS J05243042+4244506	Aur	2026-04-19
+72370	Paradys	α Aps	Aps	2025-05-18
+-	Parumleo	WASP-32	Psc	2019-12-17
+5743	Paushna	ζ Psc B	Psc	2026-09-17
+100751	Peacock	α Pav	Pav	2016-07-20
+-	Peony Star	WR 102ka	Sgr	2026-06-13
+-	Petra	WASP-80	Aql	2019-12-17
+26634	Phact	α Col	Col	2016-07-20
+58001	Phecda	γ UMa	UMa	2016-07-20
+75097	Pherkad	γ UMi	UMi	2016-08-21
+74793	Pherkad Minor	11 UMi	UMi	2026-03-22
+99711	Phoenicia	V1703 Aql	Aql	2019-12-17
+61394	Phyllon Kissinou	23 Com	Com	2024-05-16
+40881	Piautos	λ Cnc	Cnc	2018-06-01
+118268	Pili	ω Psc	Psc	2026-09-17
+88414	Pincoya	HD 164604	Sgr	2019-12-17
+23685	Ping	ε Lep	Lep	2026-03-22
+82545	Pipirima	μ2 Sco	Sco	2017-09-05
+31685	Pipit	ν Pup	Pup	2024-08-25
+-	Pipoltr	V1434 Her	Her	2019-12-17
+-	Pistol Star	V*4647 Sgr	Sgr	2026-03-22
+17851	Pleione	28 Tau	Tau	2016-06-30
+116084	Poerava	HD 221287	Tuc	2019-12-17
+11767	Polaris	α UMi	UMi	2016-06-30
+104382	Polaris Australis	σ Oct	Oct	2017-09-05
+89341	Polis	μ Sgr	Sgr	2017-09-05
+37826	Pollux	β Gem	Gem	2015-12-15
+91919	Pongaponga	ε1 Lyr A	Lyr	2026-06-18
+61941	Porrima	γ Vir	Vir	2016-07-20
+53229	Praecipua	46 LMi	LMi	2017-06-30
+20205	Prima Hyadum	γ Tau	Tau	2017-09-05
+37279	Procyon	α CMi	CMi	2016-06-30
+29655	Propus	η Gem	Gem	2016-07-20
+104538	Protome	6 Equ	Equ	2026-07-16
+70890	Proxima Centauri	α Cen	Cen	2016-08-21
+72105	Pulcherrima	ε Boo B	Boo	2026-04-15
+116771	Puwuh Atarung	ι Psc	Psc	2026-09-17
+94005	Qedty	δ CrA	CrA	2026-08-13
+74666	Qigong	δ Bootis A	Boo	2026-04-15
+73695	Quadrans	44 Boo A	Boo	2025-02-17
+88886	Ramus	102 Her	Her	2025-06-17
+16537	Ran	ε Eri	Eri	2015-12-15
+17378	Rana	δ Eri	Eri	2022-04-04
+9763	Rangifer	49 Cas	Cas	2025-12-25
+83547	Rapeto	HD 153950	Sco	2019-12-17
+48455	Rasalas	μ Leo	Leo	2016-09-12
+84345	Rasalgethi	α1 Her	Her	2016-06-30
+86032	Rasalhague	α Oph	Oph	2016-07-20
+116631	Rasalnaqa	ι And	And	2025-05-08
+85670	Rastaban	β Dra	Dra	2016-08-21
+30089	Red Rectangle	HD 44179	Mon	2026-05-09
+49669	Regulus	α Leo	Leo	2016-06-30
+5737	Revati	ζ Psc	Psc	2017-06-30
+19780	Rhombus	α Ret	Ret	2024-09-19
+24436	Rigel	β Ori	Ori	2016-06-30
+71683	Rigil Kentaurus	α Cen	Cen	2016-11-06
+81022	Rosalíadecastro	HD 149143	Oph	2019-12-17
+-	Rosette Eye	RAFGL 961	Mon	2026-06-13
+101769	Rotanev	β Del	Del	2016-09-12
+6686	Ruchbah	δ Cas	Cas	2016-08-21
+95347	Rukbat	α Sgr	Sgr	2016-07-20
+84012	Sabik	η Oph	Oph	2016-08-21
+23453	Saclateni	ζ Aur	Aur	2017-06-30
+110395	Sadachbia	γ Aqr	Aqr	2016-08-21
+112748	Sadalbari	μ Peg	Peg	2016-08-21
+109074	Sadalmelik	α Aqr	Aqr	2016-08-21
+106278	Sadalsuud	β Aqr	Aqr	2016-08-21
+100453	Sadr	γ Cyg	Cyg	2016-08-21
+114341	Safina	88 Aqr	Aqr	2024-12-12
+56572	Sagarmatha	HD 100777	Leo	2019-12-17
+27366	Saiph	κ Ori	Ori	2016-07-20
+115250	Salm	τ Peg	Peg	2017-09-05
+106824	Sāmaya	HD 205739	PsA	2019-12-17
+-	Sansuna	HAT-P-34	Sge	2019-12-17
+-	Sapaki	WR 67-1	Cir	2026-04-18
+86228	Sargas	θ Sco	Sco	2016-08-21
+84379	Sarin	δ Her	Her	2016-09-12
+17358	Sarvvis	δ Per	Per	2025-12-25
+21594	Sceptrum	53 Eri	Eri	2017-06-30
+113881	Scheat	β Peg	Peg	2016-06-30
+3179	Schedar	α Cas	Cas	2016-08-21
+20455	Secunda Hyadum	δ1 Tau	Tau	2017-09-05
+8886	Segin	ε Cas	Cas	2017-09-05
+71075	Seginus	γ Boo	Boo	2016-08-21
+20877	Shakata	75 Tau	Tau	2026-05-17
+96837	Shakh	β Sge	Sge	2026-06-18
+96757	Sham	α Sge	Sge	2016-09-12
+55664	Shama	HD 99109	Leo	2019-12-17
+14862	Shangcheng	HR 932	Cas	2025-12-25
+29997	Shangwei	HR 2209	Cam	2025-12-25
+51624	Shaomin	ρ Leo	Leo	2024-07-18
+17959	Shaowei	γ Cam	Cam	2025-12-25
+79431	Sharjah	HIP 79431	Sco	2019-12-17
+112961	Shatabhisha	λ Aqr	Aqr	2025-09-22
+85927	Shaula	λ Sco	Sco	2016-07-20
+92420	Sheliak	β Lyr	Lyr	2016-08-21
+83100	Shengong	HR 6298	Sco	2025-10-16
+8903	Sheratan	β Ari	Ari	2016-07-20
+3693	Shimu	ζ And	And	2025-03-16
+95262	Sika	HD 181720	Sgr	2019-12-17
+1645	Simmakh	41 Psc	Psc	2026-09-17
+32349	Sirius	α CMa	CMa	2016-06-30
+111710	Situla	κ Aqr	Aqr	2016-09-12
+-	Siwarha	α Ori B	Ori	2025-09-22
+113136	Skat	δ Aqr	Aqr	2016-08-21
+104780	Solaris	BD+14 4559	Peg	2019-12-17
+72571	Solitaire	E Hya	Hya	2024-10-31
+-	Southern Crab	WRAY 16-147	Cen	2026-06-13
+102626	Speedy Mic	HD 197890	Mic	2026-05-09
+65474	Spica	α Vir	Vir	2016-06-30
+-	Stella Ludoviciana	HD 116798	UMa	2026-04-17
+111169	Stellio	α Lac	Lac	2024-08-29
+77048	Stephanos	π CrB	CrB	2026-05-14
+-	Sterrennacht	HAT-P-6	And	2019-12-17
+43674	Stribor	HD 75898	Lyn	2019-12-17
+101958	Sualocin	α Del	Del	2016-09-12
+47508	Subra	ο Leo	Leo	2016-09-12
+44816	Suhail	λ Vel	Vel	2016-08-21
+100027	Sukhurmashu	α1 Cap	Cap	2026-07-16
+93194	Sulafat	γ Lyr	Lyr	2016-08-21
+69701	Syrma	ι Vir	Vir	2016-09-12
+22449	Tabit	π3 Ori	Ori	2017-09-05
+-	Taika	HAT-P-40	Lac	2019-12-17
+57399	Taiyangshou	χ UMa	UMa	2017-06-30
+63076	Taiyi	8 Dra	Dra	2017-06-30
+44127	Talitha	ι UMa	UMa	2016-07-20
+-	Tangra	WASP-21	Peg	2019-12-17
+50801	Tania Australis	μ UMa	UMa	2016-07-20
+50372	Tania Borealis	λ UMa	UMa	2016-07-20
+38041	Tapecue	HD 63765	Car	2019-12-17
+5372	Tarandus	2 UMi	Cep	2025-12-25
+97278	Tarazed	γ Aql	Aql	2016-08-21
+40526	Tarf	β Cnc	Cnc	2018-06-01
+17531	Taygeta	19 Tau	Tau	2016-08-21
+40167	Tegmine	ζ Cnc	Cnc	2016-09-12
+30343	Tejat	μ Gem	Gem	2017-02-01
+98337	Telum	γ Sge	Sge	2026-06-18
+113288	Tengshe	HR 8726	Lac	2024-09-19
+104858	Tepennekhet	δ Equ	Equ	2026-07-16
+67275	Tepiamenit	τ Bootis	Boo	2026-04-15
+98066	Terebellum	ω Sgr	Sgr	2017-09-05
+-	Tevel	HAT-P-9	Aur	2019-12-17
+21393	Theemin	υ2 Eri	Eri	2017-02-01
+68756	Thuban	α Dra	Dra	2016-06-30
+112122	Tiaki	β Gru	Gru	2017-09-05
+86414	Tianbang	ι Her	Her	2026-06-20
+91117	Tianbian	α Sct	Sct	2026-06-18
+98823	Tianfu	τ Aql	Aql	2024-05-16
+111188	Tiangang	β PsA	PsA	2026-09-17
+26451	Tianguan	ζ Tau	Tau	2017-06-30
+81693	Tianji	ζ Her	Her	2026-05-14
+104732	Tianjinnan	ζ Cyg	Cyg	2026-07-16
+4427	Tiansi	γ Cas	Cas	2025-11-13
+62423	Tianyi	7 Dra	Dra	2017-06-30
+88116	Tianyue	4 Sgr	Sgr	2026-08-13
+80687	Timir	HD 148427	Oph	2019-12-17
+-	Tislit	WASP-161	Pup	2019-12-17
+7513	Titawin	υ And	And	2015-12-15
+-	Tojil	WASP-22	Eri	2019-12-17
+71681	Toliman	α Cen	Cen	2018-08-10
+58952	Tonatiuh	HR 4609	Cam	2016-07-20
+33694	Tonglingxing	HR 2527	Cam	2026-02-22
+8198	Torcular	ο Psc	Psc	2017-09-05
+10280	Triminus	6 Tri	Tri	2025-08-25
+112447	Tugongli	ξ Peg	Peg	2026-08-13
+-	Tuiren	HAT-P-36	CVn	2019-12-17
+60644	Tupã	HD 108147	Cru	2019-12-17
+17096	Tupi	HD 23079	Ret	2019-12-17
+39757	Tureis	ρ Pup	Pup	2016-09-12
+90139	Tusizuo	109 Her	Her	2025-06-17
+104139	Udang	θ Cap	Cap	2026-02-22
+116584	Udkadua	λ And	And	2025-05-08
+47431	Ukdah	ι Hya	Hya	2018-06-01
+57291	Uklun	HD 102117	Cen	2019-12-17
+84556	Uñallamacha	HD 155985	Sco	2026-07-01
+77070	Unukalhai	α Ser	Ser	2016-08-21
+71860	Uridim	α Lup	Lup	2024-09-12
+91973	Urquchillay	ζ2 Lyr	Lyr	2026-06-18
+96078	Uruk	HD 231701	Sge	2019-12-17
+117883	Uúba	LTT 9779	Scl	2023-08-01
+91262	Vega	α Lyr	Lyr	2016-06-30
+116076	Veritate	14 And	And	2015-12-15
+63608	Vindemiatrix	ε Vir	Vir	2016-07-20
+3786	Waiping	δ Psc	Psc	2026-09-17
+35550	Wasat	δ Gem	Gem	2016-08-21
+-	Wattle	WASP-19	Vel	2023-08-01
+27628	Wazn	β Col	Col	2016-07-20
+34444	Wezen	δ CMa	CMa	2016-07-20
+-	Wouri	WASP-69	Aqr	2023-08-01
+5348	Wurren	ζ Phe	Phe	2017-11-17
+71908	Xami	α Cir	Cir	2024-12-12
+82514	Xamidimura	μ1 Sco	Sco	2017-09-05
+91852	Xihe	HD 173416	Lyr	2019-12-17
+69732	Xuange	λ Boo	Boo	2017-06-30
+80582	Yaqana	ε Nor	Nor	2026-06-18
+79882	Yed Posterior	ε Oph	Oph	2016-10-05
+79593	Yed Prior	δ Oph	Oph	2016-11-06
+85822	Yildun	δ UMi	UMi	2016-08-21
+49637	Yunü	31 Leo	Leo	2024-07-18
+114971	Yunyu	γ Psc	Psc	2026-09-17
+43103	Yuyu	ι Cnc	Cnc	2026-02-22
+60129	Zaniah	η Vir	Vir	2016-09-12
+18543	Zaurak	γ Eri	Eri	2016-07-20
+57757	Zavijava	β Vir	Vir	2016-08-21
+-	Zembra	HATS-72	Aqr	2023-08-01
+48356	Zhang	υ1 Hya	Hya	2017-06-30
+77233	Zhou	β Ser	Ser	2024-12-05
+15197	Zibal	ζ Eri	Eri	2016-09-12
+9353	Zibbatu	112 Psc	Psc	2026-09-17
+54872	Zosma	δ Leo	Leo	2016-07-20
+72622	Zubenelgenubi	α2 Lib	Lib	2016-08-21
+76333	Zubenelhakrabi	γ Lib	Lib	2017-09-05
+74785	Zubeneschamali	β Lib	Lib	2016-08-21
+97365	Zuoqi	δ Sge	Sge	2026-06-18

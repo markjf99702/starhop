@@ -50,6 +50,7 @@ It is one HTML page plus a few data files, with no build step and no server code
   - the Milky Way outline, resampled here into a grid of soft glows;
   - SEDS Messier data and other deep-sky objects.
 - [city-timezones](https://github.com/kevinroberts/city-timezones) 1.3.4 (MIT): 7,300 cities with their time zones.
+- The [IAU Catalog of Star Names](https://exopla.net/star-names/modern-iau-star-names/) (public domain), kept in `tools/wgsn.tsv`: where d3-celestial gives one traditional name to several stars, only the star the IAU gives it to keeps it, and the others go by their Bayer or Flamsteed labels.
 
 The double-star notes and object descriptions were written for Starhop. The steps to rebuild are at the top of the build script, and [data/SOURCES.md](data/SOURCES.md) has the licenses.
 

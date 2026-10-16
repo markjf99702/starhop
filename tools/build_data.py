@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Build Starhop's data files from d3-celestial (BSD-3) and city-timezones (MIT).
 
-Coordinates come out as J2000 right ascension and declination in degrees (RA 0..360).
+Coordinates come out as J2000 right ascension and declination in degrees (RA 0..360). Star names are checked
+against the IAU Working Group on Star Names' list in tools/wgsn.tsv.
 
     mkdir -p tools/src && cd tools/src
     npm pack d3-celestial@0.7.35 city-timezones@1.3.4
     for f in *.tgz; do mkdir -p "${f%.tgz}" && tar xzf "$f" -C "${f%.tgz}"; done
     cd ../.. && python3 tools/build_data.py
 """
-import json, math, sys
+import json, math, re, sys, unicodedata
+from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -35,6 +37,32 @@ def dump(name, obj):
 # ---------- stars ----------
 stars = json.load(open(D / 'stars.6.json'))['features']
 names = json.load(open(D / 'starnames.json'))
+
+
+def name_key(s):
+    return re.sub(r'[^a-z]', '', unicodedata.normalize('NFKD', s).encode('ascii', 'ignore').decode().lower())
+
+
+# d3-celestial gives some traditional names to several stars (Markab to α Peg and κ1 Pup, Tarazed to γ and η Aql),
+# so finder charts and star-hops could name the wrong one. A name the IAU Working Group on Star Names has adopted
+# stays only on the star the WGSN gives it to; a name it hasn't stays where it is unless several stars share it.
+# A star that loses its name falls back to its Bayer or Flamsteed label.
+wgsn = defaultdict(set)  # name -> the HIP numbers the WGSN gives it to
+for line in open(HERE / 'wgsn.tsv', encoding='utf-8'):
+    if line.strip() and not line.startswith('#'):
+        hip, nm = line.split('\t')[:2]
+        wgsn[name_key(nm)].add(hip)
+shared = Counter(name_key(n['name']) for n in names.values() if n.get('name'))
+
+
+def proper_name(hip, n):
+    nm = n.get('name') or ''
+    k = name_key(nm)
+    if not nm or (k in wgsn and hip not in wgsn[k]) or (k not in wgsn and shared[k] > 1):
+        return ''
+    return nm
+
+
 rows = []
 for f in stars:
     p = f['properties']
@@ -53,14 +81,15 @@ for i, (mag, hip, ra, dec, bv) in enumerate(rows):
     n = names.get(str(hip))
     if not n:
         continue
-    proper = n.get('name') or ''
+    proper = proper_name(str(hip), n)
     bayer = n.get('bayer') or ''
     if bayer.startswith('undefined'):  # d3-celestial lost one Greek letter: HIP 20535 (43 Eri) is upsilon-3 Eridani
         bayer = 'υ' + bayer[len('undefined'):]
     flam = n.get('flam') or ''
     con = n.get('c') or ''
-    if proper or (bayer and mag <= 4.5) or (flam and mag <= 4.0):
-        labels[i] = [proper, (bayer or flam) + (' ' + con if con else '') if (bayer or flam) else '', con]
+    lab = (bayer or flam) + (' ' + con if con else '') if (bayer or flam) else ''
+    if proper or (lab and (n.get('name') or (bayer and mag <= 4.5) or (flam and mag <= 4.0))):
+        labels[i] = [proper, lab, con]
 dump('stars.json', {'s': flat, 'n': labels})
 
 # ---------- famous double stars, found by designation ----------
