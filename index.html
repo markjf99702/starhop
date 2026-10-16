@@ -733,9 +733,10 @@ html.red .chart canvas{background:#050000}
   // edge or cover something on the right. The most important are placed first (the target, the Moon, planets, stars
   // by brightness, deep-sky objects, then constellation names), and one that would cover a label already placed or a
   // box kept clear (the map's buttons and time, a chart's stamp, the compass letters, the target's ring) is left out.
+  function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
   function placeLabels(g, w, h, labs, keep) {
     var placed = [];
-    function clear(b) { for (var i = 0; i < keep.length; i++) { var q = keep[i]; if (b.x < q.x + q.w && b.x + b.w > q.x && b.y < q.y + q.h && b.y + b.h > q.y) return false; } return true; }
+    function clear(b) { return !keep.some(function (q) { return overlap(b, q); }); }
     labs.sort(function (a, b) { return a.pri - b.pri; });
     g.textAlign = 'left';
     labs.forEach(function (L) {
@@ -894,12 +895,15 @@ html.red .chart canvas{background:#050000}
       var a0 = proj(P, horVec(0, vw.az - 89)), a1 = proj(P, horVec(0, vw.az + 89));
       if (a0 && a1) { g.moveTo(a0[0], a0[1]); g.lineTo(a1[0], a1[1]); g.lineTo(w * 3, h * 3); g.lineTo(-w * 2, h * 3); g.closePath(); g.fill(); }
     }
+    var compass = []; // the letters drawn, which labels keep clear of; one under the map's own buttons is left out
     if (!o.noCompass) {
       g.font = '700 13px "Atkinson Hyperlegible", sans-serif'; g.textAlign = 'center';
       for (var d8 = 0; d8 < 8; d8++) {
         var cp = proj(P, horVec(-2.2, d8 * 45)); if (!cp || cp[0] < 8 || cp[0] > w - 8 || cp[1] < 8 || cp[1] > h - 6) continue;
+        var cw = g.measureText(DIRS_S[d8]).width, cb = { t: DIRS_S[d8], x: cp[0] - cw / 2 - 1, y: cp[1] - 5, w: cw + 2, h: 11 };
+        if ((o.reserve || []).some(function (q) { return overlap(cb, q); })) continue;
         g.fillStyle = col(d8 % 2 ? '#8C7A4E' : '#DDB05A', 1); g.fillText(DIRS_S[d8], cp[0], cp[1] + 5);
-        var cw = g.measureText(DIRS_S[d8]).width; keep.push({ x: cp[0] - cw / 2 - 1, y: cp[1] - 5, w: cw + 2, h: 11 });
+        keep.push(cb); compass.push(cb);
       }
       g.textAlign = 'left';
     }
@@ -917,7 +921,7 @@ html.red .chart canvas{background:#050000}
       var sv = objHor(o.sel, sc), spx = sv && proj(P, sv);
       if (spx) { g.strokeStyle = col('#DDB05A', 1); g.lineWidth = 2; g.beginPath(); g.arc(spx[0], spx[1], 15, 0, 2 * Math.PI); g.stroke(); g.beginPath(); [[0, -21, 0, -26], [0, 21, 0, 26], [-21, 0, -26, 0], [21, 0, 26, 0]].forEach(function (l) { g.moveTo(spx[0] + l[0], spx[1] + l[1]); g.lineTo(spx[0] + l[2], spx[1] + l[3]); }); g.stroke(); keep.push({ x: spx[0] - 16, y: spx[1] - 16, w: 32, h: 32 }); }
     }
-    return { hits: hits, P: P, sc: sc, labels: placeLabels(g, w, h, labs, keep) };
+    return { hits: hits, P: P, sc: sc, labels: compass.concat(placeLabels(g, w, h, labs, keep)) };
   }
   function circle3(a, b, c) {
     var d = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])); if (Math.abs(d) < 1e-6) return null;
@@ -1555,7 +1559,7 @@ html.red .chart canvas{background:#050000}
           var tw = g.measureText(sm[0][1]).width, spots = [[0, -5], [0, 12], [-tw / 2 - 5, 4], [tw / 2 + 5, 4], [0, -15], [0, 22]];
           for (var j = 0; j < spots.length; j++) {
             var lx = sm[1] + spots[j][0], ly = sm[2] + spots[j][1], b = { x: lx - tw / 2 - 1, y: ly - 8, w: tw + 2, h: 9 };
-            if (taken.some(function (q) { return b.x < q.x + q.w && b.x + b.w > q.x && b.y < q.y + q.h && b.y + b.h > q.y; })) continue;
+            if (taken.some(function (q) { return overlap(b, q); })) continue;
             g.fillText(sm[0][1], lx, ly); taken.push(b); placed[sm[0][0]].tag = b; break;
           }
         });

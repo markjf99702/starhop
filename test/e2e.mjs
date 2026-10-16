@@ -212,9 +212,10 @@ const checkLabels = (labels, w, h, keep, where) => {
   labels.forEach((a, i) => labels.slice(i + 1).forEach(b => assert.ok(!overlaps(a, b), `${where}: "${a.t}" and "${b.t}" overlap`)));
   for (const l of labels) for (const k of keep) assert.ok(!overlaps(l, k), `${where}: "${l.t}" is under ${k.what}`);
 };
+// The map's labels and compass letters, and the time, banner and buttons over it, which they keep 2px clear of.
 const mapLabels = page => page.evaluate(() => {
   const c = document.getElementById('sky'), r = c.getBoundingClientRect();
-  const keep = ['when', 'nowBtn', 'banner', 'layBtn', 'dirSeg', 'ptBtn', 'zOut', 'zIn'].map(id => [id, document.getElementById(id).getBoundingClientRect()]).filter(([, b]) => b.width).map(([id, b]) => ({ what: '#' + id, x: b.left - r.left, y: b.top - r.top, w: b.width, h: b.height }));
+  const keep = ['when', 'nowBtn', 'banner', 'layBtn', 'dirSeg', 'ptBtn', 'zOut', 'zIn'].map(id => [id, document.getElementById(id).getBoundingClientRect()]).filter(([, b]) => b.width).map(([id, b]) => ({ what: '#' + id, x: b.left - r.left - 2, y: b.top - r.top - 2, w: b.width + 4, h: b.height + 4 }));
   return { labels: c.__labels(), w: r.width, h: r.height, keep };
 });
 const finderLabels = page => page.$eval('#finder', c => { const r = c.getBoundingClientRect(); return { labels: c.__labels, w: r.width, h: r.height, keep: [Object.assign({ what: 'the stamp' }, c.__stamp)] }; });
@@ -231,6 +232,15 @@ check('chart labels stay inside, keep apart, keep off the map’s buttons and th
       const { labels, w, h, keep } = await mapLabels(page);
       checkLabels(labels, w, h, keep, `phone map at ${at} facing ${d}`);
     }
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+  // From Chicago at 9:15 pm on Oct 16 the NE on the horizon falls against the Now button.
+  ({ ctx, page, problems } = await open({ loc: { name: 'Chicago, IL', lat: 41.85, lon: -87.65, tz: 'America/Chicago' }, time: '2026-10-16T21:15:00-05:00' }));
+  try {
+    await page.waitForFunction(() => document.getElementById('sky').__labels().length > 3);
+    const { labels, w, h, keep } = await mapLabels(page);
+    assert.ok(['N', 'E', 'S', 'W'].some(d => labels.some(l => l.t === d)), 'the compass letters are counted with the labels');
+    checkLabels(labels, w, h, keep, 'phone map from Chicago');
     assert.deepEqual(problems, []);
   } finally { await ctx.close(); }
   ({ ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false }));
