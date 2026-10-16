@@ -495,6 +495,19 @@ check('an evening planet that only sinks is highest at sunset, not at the end of
   } finally { await ctx.close(); }
 });
 
+// Oct 16 2026 in Austin, by PyEphem: the Sun sets at 6:58 pm with M13 58.9° up, civil twilight ends at 7:22 with M13
+// at 54.0°, and at 11:55 pm M13 is 2.8° up, so its finder chart shows it at a better time.
+check('a finder chart for something low shows it at nightfall, not in the sunset glow', async () => {
+  const { ctx, page, problems } = await open({ time: '2026-10-16T23:55:00-05:00' });
+  try {
+    await openCard(page, 'M13');
+    assert.match(await page.$eval('#sheet .card p:not(.big)', p => p.textContent), /Highest at sunset \(59°\)$/, 'the card counts its height from sunset');
+    await page.waitForFunction(() => document.getElementById('finder').__stamp);
+    assert.equal(await page.$eval('#finder', c => c.__stamp.t), 'Naked-eye view · 7:22 pm', 'the chart waits for the end of civil twilight');
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 const advice = page => page.$$eval('#sheet .card', cs => cs.find(c => c.querySelector('h3').textContent === 'In your telescope').querySelector('p').textContent);
 
 check('a card says an object is wider than the field only when it is', async () => {

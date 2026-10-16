@@ -1509,12 +1509,19 @@ html.red .chart canvas{background:#050000}
     var t = T.t, sc = scene(t), hv = objHor(o, sc);
     if (!hv) return;
     var aa = altAz(hv);
-    if (aa.alt < 5) { var rs = riseSet(o); if (rs.hi && rs.hi.a > 5) { t = rs.hi.t; aa = altAz(objHor(o, scene(t))); } }
+    // Low now, so the chart shows it at its highest instead, but not before nightfall: the card counts that height from
+    // sunset, and a naked-eye view in the sunset glow would show none of the stars to hop from.
+    if (aa.alt < 5) {
+      var rs = riseSet(o), at = rs.hi && rs.hi.a > 5 ? rs.hi.t : null, ah = null;
+      if (at && NIGHT.civD && at < NIGHT.civD) at = NIGHT.civD;
+      if (at) ah = altAz(objHor(o, scene(at)));
+      if (ah && ah.alt > 5) { t = at; aa = ah; }
+    }
     var vw = { az: aa.az, alt: aa.alt, fov: o.k === 'moon' ? 20 : 30 }, stamp = 'Naked-eye view · ' + tTime(t);
     g.font = '700 11px "Atkinson Hyperlegible", sans-serif';
-    var clearStrip = { x: 0, y: f.h - 21, w: g.measureText(stamp).width + 14, h: 21 }; // no labels under the stamp
+    var clearStrip = { x: 0, y: f.h - 21, w: g.measureText(stamp).width + 14, h: 21, t: stamp }; // no labels under the stamp
     c.__labels = render(g, f.w, f.h, vw, t, { target: o, hop: hop && hop.a && hop.b ? { a: hop.a, b: hop.b } : null, rings: [{ deg: 5, dash: true, a: 0.6 }], lim: 5.6, labelMag: 3.9, noMW: false, noGrid: true, dso: true, noCompass: false, reserve: [clearStrip] }).labels;
-    c.__stamp = clearStrip; // tests check the labels kept off it
+    c.__stamp = clearStrip; // tests check the labels kept off it, and the time it shows
     g.font = '700 11px "Atkinson Hyperlegible", sans-serif'; g.fillStyle = col('#A7AFC6', 0.9); g.textAlign = 'left'; g.fillText(stamp, 8, f.h - 8);
   }
   // A simulated view in the eyepiece, north up and east left.
