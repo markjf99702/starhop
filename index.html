@@ -474,6 +474,9 @@ html.red .chart canvas{background:#050000}
       var t = new Date(x), s = A.Equator(A.Body.Sun, t, OBS, true, true), m = A.Equator(A.Body.Moon, t, OBS, true, true);
       N.samples.push({ t: t, sun: A.Horizon(t, OBS, s.ra, s.dec).altitude, moon: A.Horizon(t, OBS, m.ra, m.dec, 'normal').altitude });
     }
+    // No sunset and the Sun up in the middle of the window: the midnight sun. Polar night has no sunset either, but the
+    // Sun is down. "Up" is as sunrise and sunset count it, with the top of the Sun lifted by refraction.
+    N.midnightSun = !N.sunset && N.samples[N.samples.length >> 1].sun > -0.833;
     var moonObj = { k: 'body', b: A.Body.Moon }, MOON_UP = -0.3;
     N.moonEv = crossings(moonObj, N.start, N.end, 15 * 60e3, MOON_UP);
     N.moonUpAtStart = N.samples[0].moon > MOON_UP;
@@ -954,7 +957,8 @@ html.red .chart canvas{background:#050000}
     $('when').innerHTML = esc(tTime(T.t)) + '<small>' + esc(live ? 'Now · ' : '') + esc(tDay(T.t)) + '</small>';
     $('nowBtn').classList.toggle('on', live);
     var b = $('banner');
-    if (sc.sun.alt > -4) { b.hidden = false; b.innerHTML = '<b>' + (sc.sun.alt > 0 ? 'The Sun is up' : 'Twilight') + '</b>' + (sc.sun.alt > 0 ? 'Drag along the night below to see tonight’s sky.' : 'Only the brightest stars and planets show yet.'); } else b.hidden = true;
+    if (NIGHT.midnightSun) { b.hidden = false; b.innerHTML = '<b>The Sun doesn’t set tonight</b>'; } // no night to drag along
+    else if (sc.sun.alt > -4) { b.hidden = false; b.innerHTML = '<b>' + (sc.sun.alt > 0 ? 'The Sun is up' : 'Twilight') + '</b>' + (sc.sun.alt > 0 ? 'Drag along the night below to see tonight’s sky.' : 'Only the brightest stars and planets show yet.'); } else b.hidden = true;
     drawTimeline();
   }
   var EAT_TAP = false; // a tap that closes the layers menu shouldn't also pick a star
@@ -1197,7 +1201,8 @@ html.red .chart canvas{background:#050000}
     var ph = phaseName(N.moonPhase), il = Math.round(N.moonIllum * 100), verdict;
     var ml = N.moonless.map(function (s) { return s.b - s.a; }).reduce(function (a, b) { return a + b; }, 0) / 3600e3;
     var longest = N.moonless.slice().sort(function (a, b) { return (b.b - b.a) - (a.b - a.a); })[0];
-    if (!N.dark.length) verdict = 'The sky never gets fully dark tonight — the Sun stays less than 18° below the horizon. Stick to the Moon, planets, double stars and bright clusters.';
+    if (N.midnightSun) verdict = 'The Sun doesn’t set tonight, so the sky stays light. Stick to the Moon and the brightest planets.';
+    else if (!N.dark.length) verdict = 'The sky never gets fully dark tonight — the Sun stays less than 18° below the horizon. Stick to the Moon, planets, double stars and bright clusters.';
     else if (N.moonIllum < 0.08) verdict = 'A dark, moonless night from <b>' + esc(tTime(N.dark[0].a)) + '</b> to <b>' + esc(tTime(N.dark[N.dark.length - 1].b)) + '</b> — the best kind for faint galaxies and nebulae.';
     else if (ml >= 1 && longest) verdict = 'Darkest with the Moon down from <b>' + esc(tTime(longest.a)) + '</b> to <b>' + esc(tTime(longest.b)) + '</b>' + (ml < 3 ? ' — a short window for faint galaxies and nebulae.' : ' — time for faint galaxies and nebulae.');
     else verdict = 'The ' + (il > 60 ? 'bright ' : '') + 'Moon is up through the dark hours. A good night for the Moon itself, the planets, double stars and bright clusters; faint galaxies will struggle.';
@@ -1208,7 +1213,7 @@ html.red .chart canvas{background:#050000}
       '<div class="facts">' +
       '<div class="fact"><span>Sunset</span><b>' + esc(tTime(N.sunset)) + '</b><em>Twilight until ' + esc(tTime(N.astD || N.nauD)) + '</em></div>' +
       '<div class="fact"><span>Sunrise</span><b>' + esc(tTime(N.sunrise)) + '</b><em>First light ' + esc(tTime(N.astM || N.nauM)) + '</em></div>' +
-      '<div class="fact wide"><span>Fully dark</span><b>' + (N.dark.length ? esc(tTime(N.dark[0].a)) + ' – ' + esc(tTime(N.dark[N.dark.length - 1].b)) : 'Not tonight') + '</b><em>' + (N.dark.length ? 'The Sun is 18° or more below the horizon; twilight is over' : 'The Sun stays within 18° of the horizon all night') + '</em></div>' +
+      '<div class="fact wide"><span>Fully dark</span><b>' + (N.dark.length ? esc(tTime(N.dark[0].a)) + ' – ' + esc(tTime(N.dark[N.dark.length - 1].b)) : 'Not tonight') + '</b><em>' + (N.dark.length ? 'The Sun is 18° or more below the horizon; twilight is over' : N.midnightSun ? 'The Sun doesn’t set tonight' : 'The Sun stays within 18° of the horizon all night') + '</em></div>' +
       '</div>' +
       '<div class="moonrow"><canvas id="moonIc" aria-hidden="true"></canvas><div><b>' + esc(ph) + ' · ' + il + '% lit</b><span>' + esc(moonTxt) + '</span></div></div>';
     moonIcon($('moonIc'), N.moonIllum, N.moonPhase, 44);

@@ -145,6 +145,26 @@ check('fully dark and the verdict use the same twilight and moonset times as the
   }
 });
 
+// At Tromsø the Sun doesn't set from late May to late July, and doesn't rise from late November to mid January.
+check('under the midnight sun the banner and the verdict say the Sun doesn’t set', async () => {
+  let { ctx, page, problems } = await open({ loc: TROMSO, time: '2026-06-21T23:30:00+02:00' });
+  try {
+    await until(page, '#banner', /Sun/);
+    assert.equal(await page.$eval('#banner', b => b.hidden), false);
+    assert.equal(await text(page, '#banner'), 'The Sun doesn’t set tonight', 'no hint to drag along a night that isn’t there');
+    assert.match(await text(page, '#tonightSec .lede'), /^The Sun doesn’t set tonight/);
+    assert.equal(await text(page, '#tonightSec .fact.wide em'), 'The Sun doesn’t set tonight');
+    assert.doesNotMatch(await text(page, '#tonightSec'), /18°/);
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+  ({ ctx, page, problems } = await open({ loc: TROMSO, time: '2026-12-15T21:00:00+01:00' }));
+  try {
+    assert.doesNotMatch(await text(page, '#tonightSec'), /doesn’t set/, 'polar night has no sunset either');
+    assert.equal(await page.$eval('#banner', b => b.hidden), true);
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 // Austin, Oct 13 2026: the Sun sets at 7:01 pm and is 6° down by 7:28.
 check('stars come out steadily through dusk', async () => {
   const dusk = Date.parse('2026-10-13T19:00:00-05:00');
