@@ -1385,12 +1385,14 @@ html.red .chart canvas{background:#050000}
     var N = NIGHT, obj = o.b ? { k: 'body', b: o.b } : { v: o.v || vec(o.ra, o.dec) };
     // A planet's altitude here includes refraction, so it rises at 0°; a star's doesn't, so -0.5° allows for it.
     var cr = crossings(obj, N.start, N.end, 12 * 60e3, o.k === 'moon' ? -0.3 : o.k === 'planet' ? 0 : -0.5), a0 = altOf(obj, N.start);
-    var hi = null, d0 = (N.civD || N.start).getTime(), d1 = (N.civM || N.end).getTime();
+    // The highest point is looked for from sunset, so an evening planet that only sinks gets the height it has when
+    // people first see it, not the lower one it has by the end of civil twilight.
+    var hi = null, d0 = (N.sunset || N.start).getTime(), d1 = (N.civM || N.end).getTime();
     for (var x = d0; x <= d1; x += 10 * 60e3) { var a = altOf(obj, new Date(x)); if (!hi || a > hi.a) hi = { a: a, t: new Date(x) }; }
     var bits = [];
     if (!cr.length) bits.push(a0 > 0 ? 'Up all night' : 'Below the horizon all night');
     else { if (a0 > 0) bits.push('Up at dusk'); cr.forEach(function (c) { bits.push((c.up ? 'Rises ' : 'Sets ') + tTime(c.t)); }); }
-    if (hi && hi.a > 0) bits.push((hi.t - d0 < 20 * 60e3 ? 'Highest at nightfall' : d1 - hi.t < 20 * 60e3 ? 'Highest at first light' : 'Highest ' + tTime(hi.t)) + ' (' + Math.round(hi.a) + '°)');
+    if (hi && hi.a > 0) bits.push((N.sunset && hi.t - d0 < 20 * 60e3 ? 'Highest at sunset' : d1 - hi.t < 20 * 60e3 ? 'Highest at first light' : 'Highest ' + tTime(hi.t)) + ' (' + Math.round(hi.a) + '°)');
     return { text: bits.join(' · '), hi: hi };
   }
   function openObject(o) {

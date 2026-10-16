@@ -380,6 +380,18 @@ check('Venus in the eyepiece is lit on the side facing the Sun', async () => {
   } finally { await ctx.close(); }
 });
 
+// Oct 1 2026 in Austin, by PyEphem: the Sun sets at 7:16 pm with Venus 10.4° up; by the end of civil twilight at
+// 7:40 Venus is down to 5.9°, and it sets at 8:13.
+check('an evening planet that only sinks is highest at sunset, not at the end of twilight', async () => {
+  const { ctx, page, problems } = await open({ time: '2026-10-01T19:20:00-05:00' });
+  try {
+    await openCard(page, 'Venus');
+    assert.match(await text(page, '#sheet .card .big'), /^10° up in the southwest/);
+    assert.match(await page.$eval('#sheet .card p:not(.big)', p => p.textContent), /^Up at dusk · Sets 8:1\d pm · Highest at sunset \(10°\)$/);
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 const advice = page => page.$$eval('#sheet .card', cs => cs.find(c => c.querySelector('h3').textContent === 'In your telescope').querySelector('p').textContent);
 
 check('a card says an object is wider than the field only when it is', async () => {
