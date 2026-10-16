@@ -195,6 +195,23 @@ check('on a desktop an open card covers only the side panel', async () => {
   } finally { await ctx.close(); }
 });
 
+// On a desktop a click beside the sheet doesn't close it, so it needs a way out that doesn't save.
+check('the telescope sheet closes with Cancel, which drops the changes', async () => {
+  const { ctx, page, problems } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
+  try {
+    await page.click('#scopeBtn');
+    await page.fill('#scAp', '254');
+    await page.click('#nightTitle');
+    assert.ok(await sheetOpen(page), 'a click beside the sheet leaves it open');
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    assert.equal(await sheetOpen(page), false, 'Cancel closes the sheet');
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('starhop.v1')).scope), undefined, 'nothing is saved');
+    assert.match(await text(page, '#targetSec .note'), /^Ratings assume an example 130 mm reflector/, 'the example telescope is still the one rated for');
+    assert.equal(await text(page, '#scopeName'), 'Telescope');
+    assert.deepEqual(problems, []);
+  } finally { await ctx.close(); }
+});
+
 check('an open card follows the time shown, and other sheets stay as they are', async () => {
   const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00', phone: false });
   const cardAt = () => page.$eval('#sheet .card h3', h => h.textContent);

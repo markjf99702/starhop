@@ -1537,7 +1537,7 @@ html.red .chart canvas{background:#050000}
   // ---------- telescope settings ----------
   function scopeSheet() {
     var sc = S.scope, eps = sc.eps.map(function (e) { return { f: e.f, a: e.a }; });
-    openSheet('<div class="hd"><h2>Your telescope<small>Used for difficulty ratings and eyepiece views</small></h2><button class="btn sm" type="button" id="scSave">Save</button></div><div class="bd">' +
+    openSheet('<div class="hd"><h2>Your telescope<small>Used for difficulty ratings and eyepiece views</small></h2><button class="btn sec sm" type="button" data-close>Cancel</button><button class="btn sm" type="button" id="scSave">Save</button></div><div class="bd">' +
       '<div class="fld"><span>Quick pick</span><select id="scPre"><option value="">Choose a common telescope…</option>' + PRESETS.map(function (p, i) { return '<option value="' + i + '">' + esc(p.name) + ' (' + p.ap + ' mm, f/' + (p.fl / p.ap).toFixed(1) + ')</option>'; }).join('') + '</select></div>' +
       '<div class="grid2"><label class="fld"><span>Name</span><input id="scName" autocomplete="off" maxlength="40"></label><label class="fld"><span>Aperture (mm)</span><input id="scAp" inputmode="decimal" autocomplete="off"></label><label class="fld"><span>Focal length (mm)</span><input id="scFl" inputmode="decimal" autocomplete="off"></label></div>' +
       '<div class="fld"><span>Eyepieces — focal length and apparent field</span><div class="epl" id="epl"></div><button class="btn sec sm" type="button" id="epAdd" style="align-self:flex-start">+ Add an eyepiece</button></div>' +
