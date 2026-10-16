@@ -537,6 +537,21 @@ check('Show in the sky view jumps straight up when motion is reduced', async () 
   } finally { await ctx.close(); }
 });
 
+// The muted labels (--ink3) are 10.5 to 12 px, so they need 4.5:1 on every surface they sit on.
+check('small muted labels have 4.5:1 contrast on the page and its panels', async () => {
+  const { ctx, page } = await open({ time: '2026-10-13T21:00:00-05:00' });
+  try {
+    const ratios = await page.evaluate(() => {
+      const css = getComputedStyle(document.documentElement), lum = name => {
+        const h = css.getPropertyValue(name).trim().slice(1), c = [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+      };
+      return Object.fromEntries(['--bg', '--panel', '--panel2', '--raise'].map(b => [b, +((lum('--ink3') + 0.05) / (lum(b) + 0.05)).toFixed(2)]));
+    });
+    for (const b in ratios) assert.ok(ratios[b] >= 4.5, `--ink3 on ${b} is ${ratios[b]}:1`);
+  } finally { await ctx.close(); }
+});
+
 check('without JavaScript it says what it needs, and GitHub Pages serves it as it is', async () => {
   await readFile(join(root, '.nojekyll')).catch(() => assert.fail('.nojekyll is missing'));
   const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
